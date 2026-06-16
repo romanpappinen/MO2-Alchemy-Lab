@@ -4,6 +4,11 @@
 
 A calculator for researching and cataloguing ingredient parameters in **Mortal Online 2** alchemy. Once measured, ingredients are saved to a local library and can be combined into recipes to preview potion output before you ever touch a vial.
 
+## Screenshots
+
+![Library](docs/screenshot-library.jpg)
+![Reagent Wizard](docs/screenshot-wizard.jpg)
+
 An intuitive step-by-step flow guides you through the entire research process so you always know exactly what to brew and what to record.
 
 ## How it works
