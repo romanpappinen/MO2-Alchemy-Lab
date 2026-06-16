@@ -1,83 +1,39 @@
-# alchemy_tool
+# ⚗ Alchemy Lab — Mortal Online 2
 
-Scaffolded with Vuetify CLI.
+🔗 **Live demo:** https://mo2-alchemy-lab.onrender.com
 
-## ❗️ Documentation
+A calculator for researching and cataloguing ingredient parameters in **Mortal Online 2** alchemy. Once measured, ingredients are saved to a local library and can be combined into recipes to preview potion output before you ever touch a vial.
 
-- Primary docs: https://vuetifyjs.com/
-- Getting started guide: https://vuetifyjs.com/en/getting-started/installation/
-- Community support: https://community.vuetifyjs.com/
-- Issue tracker: https://issues.vuetifyjs.com/
+An intuitive step-by-step flow guides you through the entire research process so you always know exactly what to brew and what to record.
 
-## 🧱 Stack
+## How it works
 
-- Framework: Vue 3 + Vite
-- UI Library: Vuetify
-- Language: TypeScript
-- Package manager: npm
+1. **Enter each ingredient against a known testbed** — brew small batches with a well-understood base ingredient and record the observed property values. The calculator resolves the ratio between your ingredient and the testbed to extract clean base values.
+2. **Parameters are detected and saved automatically** — each ingredient produces values for up to 6 properties (DH, HoT, HL, DP, PoT, PL). Multipliers (MV) are identified by scanning 301 candidate values for convergence across your test potions, then everything is written to your local library in one click.
 
-## 🧭 Start Here
+Once your library is built you can mix ingredients into recipes and instantly preview PU, per-gulp healing, and poison output for any vial type.
 
-- Main entry: `src/main.ts`
-- Main app component: `src/App.vue`
-- Main styles: `src/styles/`
-- Plugin setup: `src/plugins/`
+## Features
 
-## 📁 Project Structure
+- 3-step wizard for ingredient research (base values → multipliers → save)
+- Automatic MV detection with convergence algorithm
+- Base+MV mode for ingredients that carry both a base and a multiplier
+- Calibration support to correct for your exact APM / Lore levels
+- Ingredient library with search, Excel export/import
+- Recipe calculator with vial type, thirst, Alvarin clade and quality buff support
+- RU / EN interface
 
-- `src/main.ts` — application entry point
-- `src/App.vue` — root component
-- `src/components/` — reusable Vue components
-- `src/plugins/` — plugin registration and setup
-- `src/styles/` — global styles and theme settings
-- `public/` — static public files
+## Tech stack
 
-## ✨ Enabled Features
+Vue 3 · Vite · Composition API
 
-- ESLint
-- Pinia
-- Vue I18n
-- Vuetify MCP
-- Vue Router
-
-## 💿 Install
-
-Use your selected package manager (npm) to install dependencies:
-
-```bash
-npm install
-```
-
-## 🚀 Quick Start
+## Getting started
 
 ```bash
 npm install
 npm run dev
 ```
 
-## 🏗️ Build
+## License
 
-```bash
-npm run build
-```
-
-## 🧪 Available Scripts
-
-- `npm run dev`
-- `npm run build`
-- `npm run preview`
-- `npm run build-only`
-- `npm run type-check`
-- `npm run lint`
-- `npm run lint:fix`
-- `npm run mcp`
-- `npm run mcp:revert`
-
-## 💪 Support Vuetify Development
-
-This project uses Vuetify - an MIT licensed Open Source project. We are glad to welcome contributors and any support for ongoing development:
-
-- Contribute to Vuetify and ecosystem projects: https://github.com/vuetifyjs
-- Request enterprise support: https://support.vuetifyjs.com/
-- Sponsor on GitHub: https://github.com/sponsors/vuetifyjs
-- Support on Open Collective: https://opencollective.com/vuetify
+MIT
