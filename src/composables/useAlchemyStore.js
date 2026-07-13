@@ -1,10 +1,12 @@
 import { computed, reactive, ref } from 'vue'
 import { ALL_PROPS, makeMTState, makePot, MULT_PROPS, TESTBEDS } from './alchemyConstants.js'
+import { PRESET_INGREDIENTS } from './presetIngredients.js'
 import { calcA, calcL, calcQB, computeAllBases, computeAllSelfMVs, computeMVTable, computeMVTableBaseMV } from './useAlchemyCalc.js'
 
 const step = ref(1)
 const isModalOpen = ref(false)
 const editingId = ref(null)
+const editingOriginal = ref(null)
 const ingredientName = ref('')
 const nameError = ref('')
 const hasAW = ref(true)
@@ -32,12 +34,20 @@ export function useAlchemyStore () {
 
   const hasAnyBase = computed(() => Object.values(bases.value).some(v => v !== null))
   const hasAnyInput = computed(() => ingredientName.value || Object.values(pot1).some(v => v !== ''))
+  const pot1HasValues = computed(() => Object.values(pot1).some(v => v !== ''))
+
+  // True when editing an existing ingredient and Step 1 measurements
+  // (pot1) haven't been re-entered — i.e. the person is only tweaking
+  // the name/skills/etc, not re-measuring the ingredient from scratch.
+  const isEditNoRemeasure = computed(() => !!editingId.value && !pot1HasValues.value)
 
   const previewBases = computed(() => {
     const result = { ...bases.value }
     for (const prop of MULT_PROPS) {
       const det = detectedMVs.value[prop]
-      if (!det?.hit) continue
+      if (!det?.hit) {
+        continue
+      }
       if (det.estimatedBase != null && (result[prop] == null || result[prop] === 0)) {
         result[prop] = det.estimatedBase
       } else if (det.fin?.length >= 2) {
@@ -56,12 +66,12 @@ export function useAlchemyStore () {
   const detectedMVCount = computed(() => Object.values(detectedMVs.value).filter(v => v?.hit).length)
 
   const detectedMVs = computed(() =>
-      Object.fromEntries(
-          MULT_PROPS.map(prop => {
-            const tbl = computeMVTableForProp(prop)
-            return [prop, tbl.find(r => r.hit) ?? tbl.find(r => r.near) ?? null]
-          }),
-      ),
+    Object.fromEntries(
+      MULT_PROPS.map(prop => {
+        const tbl = computeMVTableForProp(prop)
+        return [prop, tbl.find(r => r.hit) ?? tbl.find(r => r.near) ?? null]
+      }),
+    ),
   )
 
   const filteredLibrary = computed(() => {
@@ -71,13 +81,15 @@ export function useAlchemyStore () {
 
   function computeMVTableForProp (prop) {
     const t = multTests[prop]
-    if (!t) return []
+    if (!t) {
+      return []
+    }
     const calib = t.calibration !== '' && !isNaN(Number.parseFloat(t.calibration))
-        ? Number.parseFloat(t.calibration)
-        : null
+      ? Number.parseFloat(t.calibration)
+      : null
     return t.baseMVMode
-        ? computeMVTableBaseMV(t.potions, t.lb, t.mv, A.value, QB.value, calib)
-        : computeMVTable(t.potions, t.lb, t.mv, A.value, QB.value, calib)
+      ? computeMVTableBaseMV(t.potions, t.lb, t.mv, A.value, QB.value, calib)
+      : computeMVTable(t.potions, t.lb, t.mv, A.value, QB.value, calib)
   }
 
   function validateAndNext () {
@@ -112,16 +124,21 @@ export function useAlchemyStore () {
     resetWizard()
     if (id !== null) {
       const rec = library.value.find(i => i.id === id)
-      if (rec) _populateFromRecord(rec)
+      if (rec) {
+        _populateFromRecord(rec)
+      }
     }
     isModalOpen.value = true
   }
 
   function _populateFromRecord (rec) {
     editingId.value = rec.id
+    editingOriginal.value = rec
     ingredientName.value = rec.name
     hasAW.value = rec.hasAW
-    if (rec.skills) Object.assign(skills, rec.skills)
+    if (rec.skills) {
+      Object.assign(skills, rec.skills)
+    }
   }
 
   function closeModal () {
@@ -130,24 +147,53 @@ export function useAlchemyStore () {
   }
 
   function saveIngredient () {
+    // Editing an existing ingredient without re-entering Step 1
+    // measurements: pot1/multTests are blank, so bases/detectedMVs would
+    // compute as empty. Keep whatever was already saved for this record
+    // instead of wiping it out.
+    if (isEditNoRemeasure.value && editingOriginal.value) {
+      const orig = editingOriginal.value
+      const record = {
+        id: orig.id,
+        name: ingredientName.value.trim(),
+        hasAW: hasAW.value,
+        skills: { ...skills },
+        bases: { ...orig.bases },
+        selfMVs: { ...orig.selfMVs },
+        mvs: { ...orig.mvs },
+        createdAt: orig.createdAt,
+        updatedAt: new Date().toISOString(),
+      }
+      const existIdx = library.value.findIndex(i => i.id === record.id)
+      if (existIdx !== -1) {
+        library.value.splice(existIdx, 1, record)
+      }
+      persistLibrary()
+      showToast('Changes saved')
+      closeModal()
+      return
+    }
+
     const mvs = Object.fromEntries(
-        MULT_PROPS.map(prop => {
-          const det = detectedMVs.value[prop]
-          const selfMV = selfMVs.value[prop]
-          let value = null
-          if (det?.hit || det?.near) {
-            value = det.MVx
-          } else if (selfMV !== null && selfMV !== 0) {
-            value = selfMV
-          }
-          return [prop + 'm', value]
-        }),
+      MULT_PROPS.map(prop => {
+        const det = detectedMVs.value[prop]
+        const selfMV = selfMVs.value[prop]
+        let value = null
+        if (det?.hit || det?.near) {
+          value = det.MVx
+        } else if (selfMV !== null && selfMV !== 0) {
+          value = selfMV
+        }
+        return [prop + 'm', value]
+      }),
     )
 
     const finalBases = { ...bases.value }
     for (const prop of MULT_PROPS) {
       const det = detectedMVs.value[prop]
-      if (!det?.hit) continue
+      if (!det?.hit) {
+        continue
+      }
       if (det.estimatedBase != null) {
         if (finalBases[prop] == null || finalBases[prop] === 0) {
           finalBases[prop] = det.estimatedBase
@@ -193,6 +239,7 @@ export function useAlchemyStore () {
   function resetWizard () {
     step.value = 1
     editingId.value = null
+    editingOriginal.value = null
     ingredientName.value = ''
     nameError.value = ''
     hasAW.value = true
@@ -208,8 +255,12 @@ export function useAlchemyStore () {
 
   function showToast (msg) {
     toast.value = msg
-    if (toastTimer) clearTimeout(toastTimer)
-    toastTimer = setTimeout(() => { toast.value = null }, 2200)
+    if (toastTimer) {
+      clearTimeout(toastTimer)
+    }
+    toastTimer = setTimeout(() => {
+      toast.value = null
+    }, 2200)
   }
 
   function persistLibrary () {
@@ -221,12 +272,24 @@ export function useAlchemyStore () {
   function loadLibrary () {
     try {
       const raw = localStorage.getItem('alchemy_library_v1')
-      if (raw) library.value = JSON.parse(raw)
+      if (raw) {
+        library.value = JSON.parse(raw)
+      } else {
+        // Fresh install / cleared storage: seed with the built-in preset
+        // instead of starting empty. Deep-cloned so later edits never
+        // mutate the shared PRESET_INGREDIENTS constant, and persisted
+        // immediately so it behaves like any normal saved library from
+        // here on (fully editable/deletable).
+        library.value = JSON.parse(JSON.stringify(PRESET_INGREDIENTS))
+        persistLibrary()
+      }
     } catch {}
   }
 
   function exportXLSX () {
-    if (library.value.length === 0 || !window.XLSX) return
+    if (library.value.length === 0 || !window.XLSX) {
+      return
+    }
     const headers = ['Name', 'AW', 'APM', 'Lore', 'PDH', 'PHoT', 'PHL', 'PDP', 'PPoT', 'PPL', 'PAlc', 'DHM', 'HoTM', 'HLM', 'DPM', 'PoTM', 'PLM']
     const rows = library.value.map(i => [
       i.name, i.hasAW ? 1 : 0, i.skills.apm, i.skills.loreLevel,
@@ -241,7 +304,9 @@ export function useAlchemyStore () {
   }
 
   function importXLSX (file) {
-    if (!file || !window.XLSX) return
+    if (!file || !window.XLSX) {
+      return
+    }
     const reader = new FileReader()
     reader.addEventListener('load', e => {
       try {
@@ -251,7 +316,9 @@ export function useAlchemyStore () {
         let added = 0
         for (let i = 1; i < data.length; i++) {
           const r = data[i]
-          if (!r[0]) continue
+          if (!r[0]) {
+            continue
+          }
           const toN = v => (!v || v === 0) ? null : +v
           const rec = {
             id: Date.now() + i,
@@ -285,7 +352,7 @@ export function useAlchemyStore () {
     pot1, pot2, activeMProp, multTests, showAllMV,
     library, searchQuery, toast,
     A, L, QB,
-    selfMVs, bases, previewBases, hasAnyBase, hasAnyInput,
+    selfMVs, bases, previewBases, hasAnyBase, hasAnyInput, isEditNoRemeasure,
     activeTest, activeMVTable, detectedMVs, activeDetectedMV, detectedMVCount,
     filteredLibrary,
     computeMVTableForProp,

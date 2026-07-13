@@ -5,6 +5,7 @@
       <label class="toggle-row">
         <input :checked="showAll" type="checkbox" @change="$emit('update:showAll', $event.target.checked)">
         {{ t('s2.allRows') }}
+        <span v-if="!showAll" class="toggle-count">({{ displayRows.length }}/{{ rows.length }})</span>
       </label>
     </div>
     <div v-if="baseMVMode" class="basemv-info-bar">
@@ -28,7 +29,7 @@
           </tr>
         </thead>
         <tbody>
-          <tr v-for="row in rows" :key="row.MVx" :class="{hit:row.hit, near:row.near}">
+          <tr v-for="row in displayRows" :key="row.MVx" :class="{hit:row.hit, near:row.near}">
             <td class="col-mv">{{ fmtMVStr(row.MVx) }}{{ row.hit?' ✓':row.near?' ~':'' }}</td>
             <td class="col-known">{{ row.known }}</td>
             <td v-if="baseMVMode" class="col-base" :class="albClass(row.estimatedBase)">
@@ -64,6 +65,16 @@
   defineEmits(['update:showAll'])
 
   const hits = computed(() => props.rows.filter(r => r.hit))
+
+  // When "show all" is off, only surface rows that matched (hit) or nearly
+  // matched (near) — the full 301-row MV range is noise otherwise.
+  // Falls back to the full list if nothing matched yet, so the table
+  // is never silently empty.
+  const displayRows = computed(() => {
+    if (props.showAll) return props.rows
+    const filtered = props.rows.filter(r => r.hit || r.near)
+    return filtered.length > 0 ? filtered : props.rows
+  })
 
   const statusClass = computed(() => {
     if (hits.value.length > 1) return 'status-warn'
@@ -103,6 +114,7 @@
 .col-base { text-align:right;min-width:80px;font-weight:600 }
 .toggle-row { display:flex;align-items:center;gap:5px;cursor:pointer;font-size:11px;color:var(--muted) }
 .toggle-row input { accent-color:var(--accent);cursor:pointer }
+.toggle-count { color:var(--dim);font-family:var(--mono) }
 .mv-scroll { overflow:auto;max-height:290px;border:1px solid var(--border);border-radius:8px }
 .mv-tbl { width:100%;border-collapse:collapse;font-size:12px }
 .mv-tbl th { padding:6px 9px;font-size:10px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--dim);background:var(--s3);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:1 }

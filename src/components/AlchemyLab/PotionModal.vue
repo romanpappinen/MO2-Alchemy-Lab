@@ -22,11 +22,11 @@
                       <div class="field" style="grid-column:1/-1">
                         <label class="lbl">{{ t('pm.recipeName') }}</label>
                         <input
-                          v-model.trim="recipe.name"
-                          :class="['input-text',{'has-err':nameError}]"
-                          :placeholder="t('pm.recipePH')"
-                          type="text"
-                          @input="nameError=''"
+                            v-model.trim="recipe.name"
+                            :class="['input-text',{'has-err':nameError}]"
+                            :placeholder="t('pm.recipePH')"
+                            type="text"
+                            @input="nameError=''"
                         >
                         <p v-if="nameError" class="err">{{ nameError }}</p>
                       </div>
@@ -45,11 +45,11 @@
                         <label class="lbl">APM</label>
                         <div class="range-row">
                           <input
-                            v-model.number="recipe.apm"
-                            max="100"
-                            min="0"
-                            step="1"
-                            type="range"
+                              v-model.number="recipe.apm"
+                              max="100"
+                              min="0"
+                              step="1"
+                              type="range"
                           >
                           <span class="range-val">{{ recipe.apm }}</span>
                         </div>
@@ -80,20 +80,30 @@
                     <div v-for="line in recipe.lines" :key="line.id" class="ing-row">
                       <div class="ing-select-wrap">
                         <select
-                          :class="{'sel-empty':!line.ingredient}"
-                          :value="line.ingredient?.id??''"
-                          @change="onSelectIngredient(line.id, $event.target.value)"
+                            :class="{'sel-empty':!line.ingredient}"
+                            :value="line.ingredient ? String(line.ingredient.id) : ''"
+                            @change="onPickIngredient(line, $event.target.value)"
                         >
                           <option value="">{{ t('pm.selectIng') }}</option>
-                          <option v-for="ing in availableFor(line.id)" :key="ing.id" :value="ing.id">{{ ing.name }}</option>
+                          <!-- Always show the ingredient actually embedded in this
+                               line as its own option, keyed by its own id —
+                               guarantees the <select> displays it correctly no
+                               matter what the current library contains, without
+                               ever changing the calc data. Primitive (string) id
+                               matching avoids the timing/identity pitfalls of
+                               binding <option> values to whole objects. -->
+                          <option v-if="line.ingredient" :value="String(line.ingredient.id)">
+                            {{ line.ingredient.name }}
+                          </option>
+                          <option v-for="ing in availableFor(line.id)" :key="ing.id" :value="String(ing.id)">{{ ing.name }}</option>
                         </select>
                       </div>
                       <input
-                        v-model.number="line.count"
-                        class="count-input"
-                        min="1"
-                        step="1"
-                        type="number"
+                          v-model.number="line.count"
+                          class="count-input"
+                          min="1"
+                          step="1"
+                          type="number"
                       >
                       <div class="aw-cell">
                         <span v-if="line.ingredient" class="aw-badge" :class="line.ingredient.hasAW?'aw1':'aw0'">{{ line.ingredient.hasAW?1:0 }}</span>
@@ -145,22 +155,22 @@
                       <p class="prop-section-lbl heal">{{ t('pm.healing') }}</p>
                       <div class="prop-rows">
                         <PropRow
-                          v-for="p in HEAL_PROPS"
-                          :key="p"
-                          :per-gulp="calculation.gulp[p]"
-                          :per-pu="calculation.props[p]"
-                          :prop="p"
+                            v-for="p in HEAL_PROPS"
+                            :key="p"
+                            :per-gulp="calculation.gulp[p]"
+                            :per-pu="calculation.props[p]"
+                            :prop="p"
                         />
                       </div>
                       <div class="hr" />
                       <p class="prop-section-lbl poison">{{ t('pm.poison') }}</p>
                       <div class="prop-rows">
                         <PropRow
-                          v-for="p in POISON_PROPS"
-                          :key="p"
-                          :per-gulp="calculation.gulp[p]"
-                          :per-pu="calculation.props[p]"
-                          :prop="p"
+                            v-for="p in POISON_PROPS"
+                            :key="p"
+                            :per-gulp="calculation.gulp[p]"
+                            :per-pu="calculation.props[p]"
+                            :prop="p"
                         />
                       </div>
                     </template>
@@ -186,33 +196,50 @@
 </template>
 
 <script setup>
-  import { VIAL_TYPES } from '@/composables/potionCalc.js'
-  import { useAlchemyStore } from '@/composables/useAlchemyStore.js'
-  import { useI18n } from '@/composables/useI18n.js'
-  import { usePotionStore } from '@/composables/usePotionStore.js'
-  import PropRow from './PropRow.vue'
+import { VIAL_TYPES } from '@/composables/potionCalc.js'
+import { useAlchemyStore } from '@/composables/useAlchemyStore.js'
+import { useI18n } from '@/composables/useI18n.js'
+import { usePotionStore } from '@/composables/usePotionStore.js'
+import PropRow from './PropRow.vue'
 
-  const HEAL_PROPS = ['dh', 'hot', 'hl']
-  const POISON_PROPS = ['dp', 'pot', 'pl']
+const HEAL_PROPS = ['dh', 'hot', 'hl']
+const POISON_PROPS = ['dp', 'pot', 'pl']
 
-  const { t } = useI18n()
-  const { isPotionModalOpen, editingPotionId, recipe, nameError, calculation,
-          closePotionModal, addLine, removeLine, setIngredient, savePotion, saveAsCopy } = usePotionStore()
-  const { library } = useAlchemyStore()
+const { t } = useI18n()
+const { isPotionModalOpen, editingPotionId, recipe, nameError, calculation,
+  closePotionModal, addLine, removeLine, savePotion, saveAsCopy } = usePotionStore()
+const { library } = useAlchemyStore()
 
-  function onSelectIngredient (lineId, ingId) {
-    setIngredient(lineId, library.value.find(i => i.id === +ingId) ?? null)
+// Explicit, controlled handler for the ingredient <select> — deliberately
+// not v-model, since v-model bound to whole objects on a <select> whose
+// options list is simultaneously changing (availableFor excludes
+// whatever is picked) can race and leave the DOM out of sync. Matching
+// by primitive id string avoids that entirely.
+function onPickIngredient (line, idStr) {
+  if (!idStr) {
+    line.ingredient = null
+    return
   }
+  const id = Number(idStr)
+  line.ingredient = library.value.find(i => i.id === id) ?? line.ingredient
+}
 
-  // For each line, only show ingredients not already selected in other lines
-  function availableFor (lineId) {
-    const selectedIds = new Set(
+// Ingredients not already used by ANY line — the current line's own
+// selection is always shown separately via its own dedicated option
+// above, bound to the exact embedded object, so it doesn't need to (and
+// must not, to avoid silently swapping the calc data) appear here too.
+// Matched by NAME (not id): an old recipe's embedded ingredient can have
+// a different id than the current library's entry for the same-named
+// ingredient (library drift/reseed) — matching by id would then fail to
+// exclude it and let the same ingredient show up twice.
+function availableFor (lineId) { // eslint-disable-line no-unused-vars
+  const selectedNames = new Set(
       recipe.lines
-        .filter(l => l.id !== lineId && l.ingredient !== null)
-        .map(l => l.ingredient.id),
-    )
-    return library.value.filter(i => !selectedIds.has(i.id))
-  }
+          .filter(l => l.ingredient !== null)
+          .map(l => l.ingredient.name.trim().toLowerCase()),
+  )
+  return library.value.filter(i => !selectedNames.has(i.name.trim().toLowerCase()))
+}
 </script>
 
 <style scoped>

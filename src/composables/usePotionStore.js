@@ -1,5 +1,6 @@
 import { computed, reactive, ref } from 'vue'
 import { calcPotion, perGulp, VIAL_TYPES } from './potionCalc.js'
+import { PRESET_POTIONS } from './presetPotions.js'
 
 const isPotionModalOpen = ref(false)
 const editingPotionId = ref(/** @type {number|null} */ (null))
@@ -190,6 +191,14 @@ export function usePotionStore () {
       const raw = localStorage.getItem('alchemy_potions_v1')
       if (raw) {
         potionList.value = JSON.parse(raw)
+      } else {
+        // Fresh install / cleared storage: seed with the built-in preset
+        // recipe instead of starting empty. Deep-cloned so later edits
+        // never mutate the shared PRESET_POTIONS constant, and persisted
+        // immediately so it behaves like any normal saved recipe from
+        // here on (fully editable/deletable).
+        potionList.value = JSON.parse(JSON.stringify(PRESET_POTIONS))
+        _persist()
       }
     } catch {}
     if (recipe.lines.length === 0) {

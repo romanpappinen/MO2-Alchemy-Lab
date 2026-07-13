@@ -70,7 +70,7 @@
   ]
   const { t } = useI18n()
   const { step, ingredientName, hasAW, skills, A, L,
-          bases, previewBases, selfMVs, detectedMVs, saveIngredient } = useAlchemyStore()
+          bases, previewBases, selfMVs, detectedMVs, saveIngredient, isEditNoRemeasure } = useAlchemyStore()
 
   // Show which bases come from Base+MV (not Step 1)
   const baseMVSources = computed(() => {
