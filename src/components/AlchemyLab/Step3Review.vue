@@ -43,6 +43,10 @@
             <p class="ri-sub warn">{{ t('s3.fromSelf') }}</p>
           </template>
           <p v-else-if="detectedMVs[p.id]?.near" class="ri-val zero">~{{ fmtMV(detectedMVs[p.id].MVx) }}</p>
+          <template v-else-if="previewMVs[p.id+'m']!=null">
+            <p class="ri-val" :class="valClass(previewMVs[p.id+'m'])">{{ fmtMV(previewMVs[p.id+'m']) }}</p>
+            <p class="ri-sub">{{ t('s3.fromSaved') }}</p>
+          </template>
           <p v-else class="ri-val zero">—</p>
         </div>
       </div>
@@ -58,30 +62,30 @@
 </template>
 
 <script setup>
-  import { computed } from 'vue'
-  import { ALL_PROPS } from '@/composables/alchemyConstants.js'
-  import { fmtAlb, fmtMV, valClass } from '@/composables/useAlchemyCalc.js'
-  import { useAlchemyStore } from '@/composables/useAlchemyStore.js'
-  import { useI18n } from '@/composables/useI18n.js'
+import { computed } from 'vue'
+import { ALL_PROPS } from '@/composables/alchemyConstants.js'
+import { fmtAlb, fmtMV, valClass } from '@/composables/useAlchemyCalc.js'
+import { useAlchemyStore } from '@/composables/useAlchemyStore.js'
+import { useI18n } from '@/composables/useI18n.js'
 
-  const MULT_PROPS_CONF = [
-    { id: 'dh', label: 'DH' }, { id: 'hot', label: 'HoT' }, { id: 'hl', label: 'HL' },
-    { id: 'dp', label: 'DP' }, { id: 'pot', label: 'PoT' }, { id: 'pl', label: 'PL' },
-  ]
-  const { t } = useI18n()
-  const { step, ingredientName, hasAW, skills, A, L,
-          bases, previewBases, selfMVs, detectedMVs, saveIngredient, isEditNoRemeasure } = useAlchemyStore()
+const MULT_PROPS_CONF = [
+  { id: 'dh', label: 'DH' }, { id: 'hot', label: 'HoT' }, { id: 'hl', label: 'HL' },
+  { id: 'dp', label: 'DP' }, { id: 'pot', label: 'PoT' }, { id: 'pl', label: 'PL' },
+]
+const { t } = useI18n()
+const { step, ingredientName, hasAW, skills, A, L,
+  bases, previewBases, previewMVs, selfMVs, detectedMVs, saveIngredient, isEditNoRemeasure } = useAlchemyStore()
 
-  // Show which bases come from Base+MV (not Step 1)
-  const baseMVSources = computed(() => {
-    const result = {}
-    for (const p of ['dh', 'hot', 'hl', 'dp', 'pot', 'pl']) {
-      const pb = previewBases.value[p]
-      const b = bases.value[p]
-      result[p] = pb != null && (b == null || b === 0) && pb !== b
-    }
-    return result
-  })
+// Show which bases come from Base+MV (not Step 1)
+const baseMVSources = computed(() => {
+  const result = {}
+  for (const p of ['dh', 'hot', 'hl', 'dp', 'pot', 'pl']) {
+    const pb = previewBases.value[p]
+    const b = bases.value[p]
+    result[p] = pb != null && (b == null || b === 0) && pb !== b
+  }
+  return result
+})
 </script>
 
 <style scoped>

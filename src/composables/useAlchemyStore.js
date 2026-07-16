@@ -41,20 +41,48 @@ export function useAlchemyStore () {
   // the name/skills/etc, not re-measuring the ingredient from scratch.
   const isEditNoRemeasure = computed(() => !!editingId.value && !pot1HasValues.value)
 
+  // Starts from whatever is already saved for this ingredient (empty if
+  // creating new) and overlays only what actually has fresh data THIS
+  // session. This is deliberately the single source of truth for both
+  // the Step 3 preview AND what saveIngredient() persists — they must
+  // never compute this differently, or the preview lies about what gets
+  // saved.
   const previewBases = computed(() => {
-    const result = { ...bases.value }
+    const orig = editingOriginal.value
+    const result = { ...(orig?.bases ?? {}) }
+    for (const prop of Object.keys(bases.value)) {
+      const fresh = bases.value[prop]
+      if (fresh != null && fresh !== 0) {
+        result[prop] = fresh
+      }
+    }
     for (const prop of MULT_PROPS) {
       const det = detectedMVs.value[prop]
       if (!det?.hit) {
         continue
       }
-      if (det.estimatedBase != null && (result[prop] == null || result[prop] === 0)) {
+      if (det.estimatedBase != null) {
         result[prop] = det.estimatedBase
       } else if (det.fin?.length >= 2) {
         const mean = det.fin.reduce((a, b) => a + b, 0) / det.fin.length
-        if (Math.abs(mean) > 0.1 && (result[prop] == null || result[prop] === 0)) {
+        if (Math.abs(mean) > 0.1) {
           result[prop] = Math.round(mean * 1000) / 1000
         }
+      }
+    }
+    return result
+  })
+
+  const previewMVs = computed(() => {
+    const orig = editingOriginal.value
+    const result = { ...(orig?.mvs ?? {}) }
+    for (const prop of MULT_PROPS) {
+      const det = detectedMVs.value[prop]
+      const selfMV = selfMVs.value[prop]
+      if (det?.hit || det?.near) {
+        result[prop + 'm'] = det.MVx
+      } else if (pot1HasValues.value && selfMV !== null && selfMV !== 0) {
+        result[prop + 'm'] = selfMV
       }
     }
     return result
@@ -66,12 +94,12 @@ export function useAlchemyStore () {
   const detectedMVCount = computed(() => Object.values(detectedMVs.value).filter(v => v?.hit).length)
 
   const detectedMVs = computed(() =>
-    Object.fromEntries(
-      MULT_PROPS.map(prop => {
-        const tbl = computeMVTableForProp(prop)
-        return [prop, tbl.find(r => r.hit) ?? tbl.find(r => r.near) ?? null]
-      }),
-    ),
+      Object.fromEntries(
+          MULT_PROPS.map(prop => {
+            const tbl = computeMVTableForProp(prop)
+            return [prop, tbl.find(r => r.hit) ?? tbl.find(r => r.near) ?? null]
+          }),
+      ),
   )
 
   const filteredLibrary = computed(() => {
@@ -85,11 +113,11 @@ export function useAlchemyStore () {
       return []
     }
     const calib = t.calibration !== '' && !isNaN(Number.parseFloat(t.calibration))
-      ? Number.parseFloat(t.calibration)
-      : null
+        ? Number.parseFloat(t.calibration)
+        : null
     return t.baseMVMode
-      ? computeMVTableBaseMV(t.potions, t.lb, t.mv, A.value, QB.value, calib)
-      : computeMVTable(t.potions, t.lb, t.mv, A.value, QB.value, calib)
+        ? computeMVTableBaseMV(t.potions, t.lb, t.mv, A.value, QB.value, calib)
+        : computeMVTable(t.potions, t.lb, t.mv, A.value, QB.value, calib)
   }
 
   function validateAndNext () {
@@ -147,74 +175,18 @@ export function useAlchemyStore () {
   }
 
   function saveIngredient () {
-    // Editing an existing ingredient without re-entering Step 1
-    // measurements: pot1/multTests are blank, so bases/detectedMVs would
-    // compute as empty. Keep whatever was already saved for this record
-    // instead of wiping it out.
-    if (isEditNoRemeasure.value && editingOriginal.value) {
-      const orig = editingOriginal.value
-      const record = {
-        id: orig.id,
-        name: ingredientName.value.trim(),
-        hasAW: hasAW.value,
-        skills: { ...skills },
-        bases: { ...orig.bases },
-        selfMVs: { ...orig.selfMVs },
-        mvs: { ...orig.mvs },
-        createdAt: orig.createdAt,
-        updatedAt: new Date().toISOString(),
-      }
-      const existIdx = library.value.findIndex(i => i.id === record.id)
-      if (existIdx !== -1) {
-        library.value.splice(existIdx, 1, record)
-      }
-      persistLibrary()
-      showToast('Changes saved')
-      closeModal()
-      return
-    }
-
-    const mvs = Object.fromEntries(
-      MULT_PROPS.map(prop => {
-        const det = detectedMVs.value[prop]
-        const selfMV = selfMVs.value[prop]
-        let value = null
-        if (det?.hit || det?.near) {
-          value = det.MVx
-        } else if (selfMV !== null && selfMV !== 0) {
-          value = selfMV
-        }
-        return [prop + 'm', value]
-      }),
-    )
-
-    const finalBases = { ...bases.value }
-    for (const prop of MULT_PROPS) {
-      const det = detectedMVs.value[prop]
-      if (!det?.hit) {
-        continue
-      }
-      if (det.estimatedBase != null) {
-        if (finalBases[prop] == null || finalBases[prop] === 0) {
-          finalBases[prop] = det.estimatedBase
-        }
-      } else if (det.fin?.length >= 2) {
-        const mean = det.fin.reduce((a, b) => a + b, 0) / det.fin.length
-        if (Math.abs(mean) > 0.1 && (finalBases[prop] == null || finalBases[prop] === 0)) {
-          finalBases[prop] = Math.round(mean * 1000) / 1000
-        }
-      }
-    }
+    const orig = editingOriginal.value
 
     const record = {
       id: editingId.value ?? Date.now(),
       name: ingredientName.value.trim(),
       hasAW: hasAW.value,
       skills: { ...skills },
-      bases: finalBases,
-      selfMVs: { ...selfMVs.value },
-      mvs,
-      createdAt: new Date().toISOString(),
+      bases: { ...previewBases.value },
+      selfMVs: pot1HasValues.value ? { ...selfMVs.value } : (orig?.selfMVs ?? {}),
+      mvs: { ...previewMVs.value },
+      createdAt: orig?.createdAt ?? new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
     }
 
     const existIdx = library.value.findIndex(i => i.id === record.id)
@@ -352,7 +324,7 @@ export function useAlchemyStore () {
     pot1, pot2, activeMProp, multTests, showAllMV,
     library, searchQuery, toast,
     A, L, QB,
-    selfMVs, bases, previewBases, hasAnyBase, hasAnyInput, isEditNoRemeasure,
+    selfMVs, bases, previewBases, previewMVs, hasAnyBase, hasAnyInput, isEditNoRemeasure,
     activeTest, activeMVTable, detectedMVs, activeDetectedMV, detectedMVCount,
     filteredLibrary,
     computeMVTableForProp,

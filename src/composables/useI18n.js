@@ -119,6 +119,7 @@ const messages = {
     's3.mvsTitle': 'Мультипликаторы',
     's3.fromTest': 'из теста мульт.',
     's3.fromSelf': 'self-MV (из шага 1)',
+    's3.fromSaved': 'сохранено ранее',
     's3.saveBtn': 'Сохранить в библиотеку',
     's3.editHint': 'Показаны сохранённые значения. Чтобы обновить — вернись на шаг 1 и перемерь.',
 
@@ -290,6 +291,7 @@ const messages = {
     's3.mvsTitle': 'Multipliers',
     's3.fromTest': 'from mult. test',
     's3.fromSelf': 'self-MV (from step 1)',
+    's3.fromSaved': 'saved earlier',
     's3.saveBtn': 'Save to Library',
     's3.editHint': 'Showing saved values. To update — go back to step 1 and re-measure.',
 
