@@ -1,5 +1,6 @@
 import { computed, reactive, ref } from 'vue'
 import { METALS } from './craftConstants.js'
+import { useI18n } from './useI18n.js'
 
 // ── Ore price tracking ────────────────────────────────────────────────────
 const ALL_ORE_KEYS = ['Calx', 'Granum', 'Tephra', 'Gabore', 'Saburra', 'Bleckblende', 'Bor', 'Water', 'Fuming Salt', 'Rock Oil', 'Sulfur', 'Ichor', 'Dragon Salt']
@@ -37,6 +38,7 @@ const priceMode = reactive({ absolute: true })
 const availableTools = reactive(loadAvailableTools())
 
 export function useCraftCalc () {
+  const { t } = useI18n()
   const metals = METALS
   const metal = computed(() => METALS.find(m => m.id === currentMetal.value))
 
@@ -44,7 +46,7 @@ export function useCraftCalc () {
     if (!metal.value) {
       return { target: 0, runs: 0, tree: [] }
     }
-    return metal.value.calc(targets[currentMetal.value] || 10000, selections[currentMetal.value] || {}, bonuses, availableTools)
+    return metal.value.calc(targets[currentMetal.value] || 10000, selections[currentMetal.value] || {}, bonuses, availableTools, t)
   })
 
   // Dynamic ore list, read off the "base resources" summary section of the

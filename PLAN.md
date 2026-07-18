@@ -21,9 +21,10 @@ Russian anywhere else.
 - [x] This plan file
 - [x] Remove dead code (mechanical `no-unused-vars` sweep) — surfaced two real bugs along the way: Messing/Bron silently dropped Coke/Coal requirements, Tindremic dropped Almine's mandatory Calx Powder catalyst. Fixed by adding a proper Coal->Coke chain + Crusher/Grinder Calx auto-mix to all three metals.
 
+- [x] Translate all material-tree labels through `useI18n.js` (RU/EN) — `calc()` now takes a `t` function; ~40 shared `tree.*`/`tag.*` template keys cover all 7 metals' rows in both locales
+
 ## In progress
 
-- [ ] Translate all material-tree labels through `useI18n.js` (RU/EN) — currently hardcoded Russian strings in `craftConstants.js`
 - [ ] Translate existing Russian code comments in `craftConstants.js` to English
 - [ ] Add **Skadite** as a craftable target
 - [ ] Real automated test suite (current checks are one-off node scripts, not part of the repo)

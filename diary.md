@@ -1,5 +1,18 @@
 # Diary
 
+## 2026-07-18 — Full RU/EN translation of the material tree
+
+**What changed:** The material tree in `craftConstants.js` had ~250 hardcoded Russian row labels across all 7 metals, generated inside each metal's `calc()`. Threaded a `t` translation function through `calc(target, sel, bon, tools, t)` (default `t=(k)=>k` so existing callers/tests without a real translator don't crash), passed from `useCraftCalc.js`'s `result` computed via `useI18n()`. Replaced every dynamic Russian tree-row string with a `t('tree.xxx', {vars})` call against ~40 shared template keys added to `useI18n.js` (RU+EN) — most patterns repeat across metals (`{item} → {target}`, `{item} (byproduct from {source})`, etc.) so the key count is far smaller than the row count.
+
+Also: `tagLabel` fields (руда/покупка/сложно/легко/побочка/бонус) were converted from literal Russian display text to semantic English keys (`ore`/`purchase`/`hard`/`easy`/`byproduct`/`bonus`); `CraftTreePanel.vue` now resolves them via `t('tag.' + node.tagLabel)` instead of rendering the field directly. Fixed 3 stray Cyrillic strings in `label:` fields that weren't part of the tree system at all (`'Lupium (доп.)'`, two Calx/Saburra option labels with `(даёт ...)`) — these are static recipe-panel labels, simply translated to English text to match every other label in the file.
+
+**What was verified:**
+- Every `t()` key used in `craftConstants.js` (40 total) confirmed present in both the RU and EN dictionaries in `useI18n.js` (scripted check, not manual).
+- `grep` swept all `name:`/`label:`/`tagLabel:` fields in `craftConstants.js` for Cyrillic characters after the change: zero matches.
+- Re-ran the full verification suite: 194/194 recipe options still match `refineRecipes.js`; 1,746 metal/option/tool/target combinations swept with zero NaN/negative tree values (data and math are untouched by this change — only display strings moved through `t()`).
+- Browser-driven check (Playwright, fresh `npm run dev` instance) across all 7 metals in both RU and EN: zero leftover Cyrillic text in EN mode, zero console errors. Hit one false alarm mid-way — a long-running dev server from earlier in the session had a stale HMR/watch state and kept serving pre-edit output for 6 of 7 metals despite the on-disk file being correct (confirmed via direct `grep`); restarting `npm run dev` from scratch resolved it. Not a code bug.
+- `eslint --rule no-unused-vars` and `vue-tsc --build --force`: clean.
+
 ## 2026-07-18 — Remove dead code, fix hidden Coke/CalxPowder tracking bugs
 
 **What changed:** Started as a "remove dead code" task; mechanical `eslint --rule no-unused-vars` sweep across `craftConstants.js` surfaced several genuinely dead variables (harmless, removed) but also two real correctness bugs hiding behind "unused variable" warnings:
