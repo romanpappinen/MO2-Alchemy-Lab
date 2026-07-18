@@ -18,16 +18,15 @@ Russian anywhere else.
 - [x] Tool availability: sidebar selector + recipe-option sorting by availability
 - [x] Waste-minimization hint: auto-mix Crusher/Grinder for Calx Powder+Coal (Oghmium, Steel, Cronite, Tungsteel)
 - [x] Steel: added the missing Pig Iron-via-Sulfur option (existed on 3 of 4 comparable metals)
+- [x] This plan file
+- [x] Remove dead code (mechanical `no-unused-vars` sweep) — surfaced two real bugs along the way: Messing/Bron silently dropped Coke/Coal requirements, Tindremic dropped Almine's mandatory Calx Powder catalyst. Fixed by adding a proper Coal->Coke chain + Crusher/Grinder Calx auto-mix to all three metals.
 
 ## In progress
 
-- [ ] This plan file
 - [ ] Translate all material-tree labels through `useI18n.js` (RU/EN) — currently hardcoded Russian strings in `craftConstants.js`
 - [ ] Translate existing Russian code comments in `craftConstants.js` to English
 - [ ] Add **Skadite** as a craftable target
-- [ ] Remove dead code (`coalPool` in Messing/Bron, and anything similar found along the way)
 - [ ] Real automated test suite (current checks are one-off node scripts, not part of the repo)
-- [ ] Cleanup — scope to be confirmed
 
 ## Notes / decisions made along the way
 

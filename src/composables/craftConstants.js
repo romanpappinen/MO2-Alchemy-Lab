@@ -83,9 +83,7 @@ export const METALS = [
     const sangR = this.steps[0].options[sel.sang??1];
     const rbR   = this.steps[1].options[sel.rb??2];
     const lupR  = this.steps[2].options[sel.lup??0];
-    const alR   = this.steps[3].options[sel.al??0];
     const bloR  = this.steps[4].options[sel.blo??3];
-    const calxR = this.steps[5].options[sel.calx??1];
     const pigR  = this.steps[6].options[sel.pig??1];
     const galR  = this.steps[7].options[sel.gal??2];
     const pyrR  = this.steps[8].options[sel.pyr??4];
@@ -117,7 +115,6 @@ export const METALS = [
     const needCP_gs   = r(needGS, RO, 5000);
 
     // ── ALMINE + ARCONITE: система уравнений для микса BF / GN ──
-    const aBF_al=alR.almine*EM, aBF_arc=alR.arconite*EM;
     // BF: almine=400*EM, arconite=800*EM per batch (10000 Pyroxene)
     // GN: almine=2000*EM, arconite=160*EM per batch
     const BF_al=400*EM, BF_arc=800*EM, GN_al=2000*EM, GN_arc=160*EM;
@@ -172,8 +169,6 @@ export const METALS = [
     const gpBonus     = Math.max(0, gpFromBlo - needGP);
 
     // ── GALBINUM пул: нужно для Pyroxene + Lupium (если base=Galbinum) ──
-    const needGalb_lup_placeholder = 0; // будет пересчитан ниже после Lupium
-    // Суммируем побочки Galbinum
     const galbPool = galbFromRB + galbFromBlo;
 
     // ── GALBINUM для Pyroxene ← вычитаем побочку ──
@@ -510,7 +505,7 @@ export const METALS = [
 },
 {
   id:'messing', name:'Messing',
-  defaultSel:{cup:5, mal:7, cals:0, sab:1},
+  defaultSel:{cup:5, mal:7, cals:0, sab:1, coke:1, calx:1},
   steps:[
     {id:'cup', label:'Cuprum', options:[
       // Amarantum-based
@@ -559,17 +554,27 @@ export const METALS = [
       {label:'Crusher + Saburra',           furnace:'Crusher',input:'10 000 Saburra',             yield:2000, cat:null,    catAmt:0,   mal:1584},
       {label:'Grinder + Saburra + Water ★', furnace:'Grinder',input:'10 000 Saburra + 900 Water', yield:4275, cat:'Water', catAmt:900, mal:950,},
     ]},
+    {id:'coke', label:'Coke', options:[
+      {label:'Furnace + Coal + Coal',           furnace:'Furnace', input:'10 000 Coal + 600 Coal',        yield:7200, coalTotal:10600, useCalxPowder:false},
+      {label:'Furnace + Coal + Calx Powder ★',  furnace:'Furnace', input:'10 000 Coal + 720 Calx Powder', yield:7200, coalTotal:10000, useCalxPowder:true, calxPowderCat:720,},
+    ]},
+    {id:'calx', label:'Calx Powder', options:[
+      {label:'Crusher + Calx',           furnace:'Crusher', input:'10 000 Calx',               yield:1361, cat:null,    catAmt:0,    coal:2151},
+      {label:'Grinder + Calx + Water ★', furnace:'Grinder', input:'10 000 Calx + 1 000 Water', yield:2058, cat:'Water', catAmt:1000, coal:1140,},
+    ]},
   ],
-  calc(target, sel, bon={}) {
+  calc(target, sel, bon={}, tools={}) {
     const IM = bon.ironmaster ? 1.03 : 1;
     const EM = 1 + (bon.extractBonus||0)/100;
     const RO = 7000 * IM;
     const T  = target;
+    const isAvail = name => tools[name] !== false;
 
     const cupR  = this.steps[0].options[sel.cup??5];
     const malR  = this.steps[1].options[sel.mal??7];
     const calsR = this.steps[2].options[sel.cals??0];
     const sabR  = this.steps[3].options[sel.sab??1];
+    const cokeR = this.steps[4].options[sel.coke??1];
 
     // ── MESSING: 10000 Cuprum + 5000 Calamine + 5000 Saburra Powder → RO ──
     const needCup = r(T, RO, 10000);
@@ -578,8 +583,6 @@ export const METALS = [
 
     // ── SABURRA POWDER ──
     const sabYield    = sabR.yield * EM;
-    const needSaburra = r(needSP, sabYield, 10000);
-    const sabWater    = r(needSP, sabYield, sabR.catAmt);
     // Malachite побочка из Saburra Powder рецептов
     const malFromSab  = sabR.mal ? r(needSP, sabYield, sabR.mal) : 0;
 
@@ -596,10 +599,6 @@ export const METALS = [
     let needMal_forCup = 0;
     if (cupR.base === 'Malachite') needMal_forCup = needCupBase;
 
-    // ── ELECTRUM (если Cuprum из Electrum) ──
-    let needElectrum_forCup = 0;
-    if (cupR.base === 'Electrum') needElectrum_forCup = needCupBase;
-
     // ── AMARANTUM (если Cuprum из Amarantum) ──
     let needAmarantum_forCup = 0;
     if (cupR.base === 'Amarantum') needAmarantum_forCup = needCupBase;
@@ -610,12 +609,6 @@ export const METALS = [
     // Malachite из Calspar, Calx или Saburra
     const malYield = malR.yield * EM;
 
-    // Malachite пул (побочки)
-    // из Calspar рецепта (если mal base=Calx)
-    const malFromCalxCrusher = malR.base==='Calx' ? 0 : 0; // считается ниже
-    // из Saburra Powder рецепта
-    // из Calspar рецепта (побочка cals step)
-
     // Сначала посчитаем сколько Malachite нужно из mal step
     // Вычитаем побочки: из Saburra Powder крафта
     const malPool_pre = malFromSab;
@@ -624,7 +617,6 @@ export const METALS = [
     let needMal_craft = 0; // сколько крафтить через mal step
     let needCals_forMal = 0;
     let calsYield = 0;
-    let malFromCals = 0; // побочный Malachite из Calspar step
 
     if (malR.base === 'Calspar') {
       // Обычный путь: Calspar → Malachite
@@ -648,12 +640,6 @@ export const METALS = [
     const chalkGlanceBonus = (malR.chalkGlance && needMal_craft > 0) ? r(needMal_craft, malYield, malR.chalkGlance) : 0;
     // Saburra Powder побочка из Saburra Malachite рецепта
     const sabPFromMal = (malR.saburraP && needMal_craft > 0) ? r(needMal_craft, malYield, malR.saburraP) : 0;
-
-    // ── ELECTRUM пул → засчитываем в Cuprum (если нужен) ──
-    const electrumPool = electrumFromMal + electrumFromCup;
-    // Если Cuprum из Electrum — electrum уже учтён в needElectrum_forCup
-    // Если нет — electrum это просто бонус
-    const electrumBonus = cupR.base !== 'Electrum' ? electrumPool : 0;
 
     // ── CALSPAR (отдельный step, если нужен) ──
     calsYield = calsR.yield * EM;
@@ -697,25 +683,62 @@ export const METALS = [
     const sabWater_sp    = netSabP > 0 ? r(netSabP, sabYield, sabR.catAmt) : 0;
     const totalSaburra   = needSaburra_sp + needSaburra_mal;
 
-    // ── CALX POWDER суммарно ──
+    // ── CALX POWDER: катализаторы Cuprum/Coke против побочек Calspar/Malachite-via-Calx ──
     const cpForCup = cupR.cat==='CalxPowder' ? r(needCup, cupYield, cupR.catAmt) : 0;
-    const totalCP  = cpForCup + calxPowderFromCals + calxPowderFromMalCalx;
+    const cpSupply = calxPowderFromCals + calxPowderFromMalCalx;
 
-    // ── CALX суммарно ──
+    // ── CALX суммарно (для Calspar / Malachite-via-Calx) ──
     const needCalxTotal = needCalx_cals + needCalx_mal;
 
-    // ── COAL суммарно ──
-    const coalPool = coalFromCals + coalFromMalCalx;
+    // ── COAL / COKE: Cuprum и Malachite могут требовать Coal напрямую или через Coke ──
     const cupCoal  = cupR.cat==='Coal' ? r(needCup, cupYield, cupR.catAmt) : 0;
     const malCoke  = malR.cat==='Coke' ? malCat : 0;
     const cupCoke  = cupR.cat==='Coke' ? r(needCup, cupYield, cupR.catAmt) : 0;
+    const totalCoke = malCoke + cupCoke;
+    const cokeYield = 7200 * EM;
+    const needCoal_coke = totalCoke > 0 ? r(totalCoke, cokeYield, cokeR.coalTotal) : 0;
+    const cpForCoke = (totalCoke > 0 && cokeR.useCalxPowder) ? r(totalCoke, cokeYield, cokeR.calxPowderCat) : 0;
+
+    // ── CALX POWDER дефицит: сколько докрафтить сверх побочек Calspar/Malachite ──
+    const cpDemand  = cpForCup + cpForCoke;
+    const cpDeficit = Math.max(0, cpDemand - cpSupply);
+
+    // ── CALX: смешиваем Crusher/Grinder, чтобы закрыть дефицит Calx Powder и Coal без остатка ──
+    // (Coal-побочка из Calspar/Malachite-via-Calx крафта засчитывается в счёт нужды заранее)
+    const coalPool = coalFromCals + coalFromMalCalx;
+    const totalCoalNeedGross = cupCoal + needCoal_coke;
+    const totalCoalNeed = Math.max(0, totalCoalNeedGross - coalPool);
+    const coalPoolBonus = Math.max(0, coalPool - totalCoalNeedGross);
+    const calxCrusher = this.steps[5].options[0], calxGrinder = this.steps[5].options[1];
+    const cpCr = calxCrusher.yield*EM, coalCr = calxCrusher.coal*EM;
+    const cpGr = calxGrinder.yield*EM, coalGr = calxGrinder.coal*EM;
+    let xCrusher = 0, yGrinder = 0;
+    if (isAvail('Crusher') && isAvail('Grinder')) {
+      const calxDet = cpCr*coalGr - cpGr*coalCr;
+      xCrusher = (cpDeficit*coalGr - totalCoalNeed*cpGr) / calxDet;
+      yGrinder = (cpCr*totalCoalNeed - coalCr*cpDeficit) / calxDet;
+      if (xCrusher < 0) { xCrusher=0; yGrinder=cpDeficit/cpGr; }
+      if (yGrinder < 0) { yGrinder=0; xCrusher=cpDeficit/cpCr; }
+    } else if (isAvail('Crusher')) {
+      xCrusher = cpDeficit/cpCr;
+    } else {
+      yGrinder = cpDeficit/cpGr;
+    }
+    const needCalxForCP  = (xCrusher + yGrinder) * 10000;
+    const calxWaterForCP = yGrinder * calxGrinder.catAmt;
+    const cpFromCalx      = xCrusher*cpCr + yGrinder*cpGr;
+    const coalFromCalx    = xCrusher*coalCr + yGrinder*coalGr;
+
+    const netCoal   = Math.max(0, totalCoalNeed - coalFromCalx);
+    const coalBonus = Math.max(0, coalFromCalx - totalCoalNeed) + coalPoolBonus;
+    const cpBonus    = Math.max(0, (cpSupply + cpFromCalx) - cpDemand);
 
     // ── БАЗОВЫЕ РУДЫ ──
     let needGranum = needGranum_cup;
-    const needCalx_total = needCalxTotal;
+    const needCalx_total = needCalxTotal + needCalxForCP;
 
     // ── ИТОГО ВОДА ──
-    const needWater = sabWater_sp + calsWater
+    const needWater = sabWater_sp + calsWater + calxWaterForCP
       + (malR.cat==='Water' ? malCat : 0)
       + (malR.base==='Calx' ? malWater_calx : 0)
       + (malR.base==='Saburra' ? sabMalWater : 0);
@@ -782,12 +805,29 @@ export const METALS = [
         {divider:true},
       ]:[]),
 
+      // ── Calx Powder / Coke (если Cuprum/Malachite требуют CalxPowder или Coke) ──
+      ...(cpDemand>0||totalCoalNeed>0?[
+        {name:'▸ CALX POWDER / COKE', cls:'tree-section', amount:0, prefix:''},
+        ...(cpForCup>0?[{name:'Calx Powder для Cuprum', cls:'intermediate', amount:cpForCup, prefix:'   ├─ '}]:[]),
+        ...(totalCoke>0?[
+          {name:'Coke (всего)', cls:'intermediate', amount:totalCoke, prefix:'   ├─ '},
+          {name:'Coal для Coke', cls:'intermediate', amount:needCoal_coke, prefix:'   │  └─ '},
+        ]:[]),
+        ...(calsparFromMalCalx>0?[{name:'Calspar (побочка из Malachite-via-Calx)', cls:'base-easy', amount:calsparFromMalCalx, prefix:'   ', tag:'easy', tagLabel:'побочка'}]:[]),
+        ...(coalFromMalCalx>0?[{name:'Coal (побочка из Malachite-via-Calx, засчитана)', cls:'base-easy', amount:coalFromMalCalx, prefix:'   ', tag:'easy', tagLabel:'побочка'}]:[]),
+        {name:`Calx (${xCrusher.toFixed(1)} прог. Crusher + ${yGrinder.toFixed(1)} прог. Grinder — закрывает Calx Powder и Coal без остатка)`, cls:'base-ore', amount:needCalxForCP, prefix:'   └─ ', tag:'mine', tagLabel:'руда'},
+        {divider:true},
+      ]:[]),
+
       // ── ИТОГО БАЗОВЫЕ
       {name:'── ИТОГО БАЗОВЫЕ РЕСУРСЫ ──', cls:'tree-section', amount:0, prefix:''},
       {divider:true},
       ...(needGranum>0?[{name:'Granum',  cls:'base-ore', amount:needGranum,    prefix:'', tag:'mine', tagLabel:'руда'}]:[]),
       ...(totalSaburra>0?[{name:'Saburra',cls:'base-ore',amount:totalSaburra,  prefix:'', tag:'mine', tagLabel:'руда'}]:[]),
       ...(needCalx_total>0?[{name:'Calx', cls:'base-ore',amount:needCalx_total,prefix:'', tag:'mine', tagLabel:'руда'}]:[]),
+      ...(cpBonus>0?[{name:'Calx Powder бонус (излишек)', cls:'base-easy', amount:cpBonus, prefix:'', tag:'easy', tagLabel:'бонус'}]:[]),
+      ...(coalBonus>0?[{name:'Coal бонус (излишек от Calx)', cls:'base-easy', amount:coalBonus, prefix:'', tag:'easy', tagLabel:'бонус'}]:[]),
+      ...(netCoal>0?[{name:'Coal (доп.)', cls:'base-ore', amount:netCoal, prefix:'', tag:'mine', tagLabel:'побочка'}]:[]),
       ...(needBor>0?[{name:'Bor',         cls:'base-hard',amount:needBor,       prefix:'', tag:'hard', tagLabel:'сложно'}]:[]),
       ...(needIchor>0?[{name:'Ichor',     cls:'base-buy', amount:needIchor,     prefix:'', tag:'buy',  tagLabel:'покупка'}]:[]),
       ...(needDragonSalt>0?[{name:'Dragon Salt',cls:'base-buy',amount:needDragonSalt,prefix:'',tag:'buy',tagLabel:'покупка'}]:[]),
@@ -800,7 +840,7 @@ export const METALS = [
 },
 {
   id:'tindremic', name:'Tindremic Messing',
-  defaultSel:{gem:0,al:1,cup:0,mal:0,cals:2,sab:1},
+  defaultSel:{gem:0,al:1,cup:0,mal:0,cals:2,sab:1,coke:1,calx:1},
   steps:[
     {id:'gem',label:'Gem Metal',options:[
       {label:'Fabricula + Rock Oil ★',     furnace:'Fabricula',    input:'10 000 Waterstone + 800 Rock Oil',   yield:3200,cat:'Rock Oil',   catAmt:800},
@@ -831,17 +871,27 @@ export const METALS = [
       {label:'Crusher + Saburra',          furnace:'Crusher',input:'10 000 Saburra',            yield:2000,cat:null,   catAmt:0},
       {label:'Grinder + Saburra + Water ★',furnace:'Grinder',input:'10 000 Saburra + 900 Water',yield:4275,cat:'Water',catAmt:900},
     ]},
+    {id:'coke', label:'Coke', options:[
+      {label:'Furnace + Coal + Coal',           furnace:'Furnace', input:'10 000 Coal + 600 Coal',        yield:7200, coalTotal:10600, useCalxPowder:false},
+      {label:'Furnace + Coal + Calx Powder ★',  furnace:'Furnace', input:'10 000 Coal + 720 Calx Powder', yield:7200, coalTotal:10000, useCalxPowder:true, calxPowderCat:720,},
+    ]},
+    {id:'calx', label:'Calx Powder', options:[
+      {label:'Crusher + Calx',           furnace:'Crusher', input:'10 000 Calx',               yield:1361, cat:null,    catAmt:0,    coal:2151},
+      {label:'Grinder + Calx + Water ★', furnace:'Grinder', input:'10 000 Calx + 1 000 Water', yield:2058, cat:'Water', catAmt:1000, coal:1140,},
+    ]},
   ],
-  calc(target,sel,bon={}){
+  calc(target,sel,bon={},tools={}){
     const IM=bon.ironmaster?1.03:1;
     const EM=1+(bon.extractBonus||0)/100;
     const RO=7000*IM;
+    const isAvail = name => tools[name] !== false;
     const gR  =this.steps[0].options[sel.gem??0];
     const aR  =this.steps[1].options[sel.al??1];
     const cupR=this.steps[2].options[sel.cup??0];
     const malR=this.steps[3].options[sel.mal??0];
     const cR  =this.steps[4].options[sel.cals??2];
     const sR  =this.steps[5].options[sel.sab??1];
+    const cokeR=this.steps[6].options[sel.coke??1];
     const T=target;
 
     // Tindremic: 10000 Messing + 5000 Almine + 5000 Gem Metal → RO
@@ -877,9 +927,45 @@ export const METALS = [
     const needBorCup=(sel.cup===0||sel.cup===2)?cupCat:0;
     const needBorMal=sel.mal===0?malCat:0;
     const needBor  = needBorGem+needBorCup+needBorMal;
-    const needCoke = sel.cup===1?cupCat:0;
     const needIchor= sel.mal===2?malCat:0;
-    const needWater= calsWater+sabWater+(sel.mal===1?malCat:0);
+
+    // ── COKE / COAL: Cuprum может требовать Coke (крафтится из Coal) ──
+    const cupCoke = sel.cup===1?cupCat:0;
+    const cokeYield = 7200*EM;
+    const needCoal_coke = cupCoke>0 ? r(cupCoke, cokeYield, cokeR.coalTotal) : 0;
+    const cpForCoke = (cupCoke>0 && cokeR.useCalxPowder) ? r(cupCoke, cokeYield, cokeR.calxPowderCat) : 0;
+
+    // ── CALX POWDER: Almine требует её как катализатор всегда (оба варианта al-шага) ──
+    const cpDeficit = alCat + cpForCoke;
+
+    // ── CALX: смешиваем Crusher/Grinder, чтобы закрыть Calx Powder (для Almine+Coke) и Coal без остатка ──
+    const calxCrusher = this.steps[7].options[0], calxGrinder = this.steps[7].options[1];
+    const totalCoalNeed = needCoal_coke;
+    const cpCr = calxCrusher.yield*EM, coalCr = calxCrusher.coal*EM;
+    const cpGr = calxGrinder.yield*EM, coalGr = calxGrinder.coal*EM;
+    let xCrusher = 0, yGrinder = 0;
+    if (isAvail('Crusher') && isAvail('Grinder')) {
+      const calxDet = cpCr*coalGr - cpGr*coalCr;
+      xCrusher = (cpDeficit*coalGr - totalCoalNeed*cpGr) / calxDet;
+      yGrinder = (cpCr*totalCoalNeed - coalCr*cpDeficit) / calxDet;
+      if (xCrusher < 0) { xCrusher=0; yGrinder=cpDeficit/cpGr; }
+      if (yGrinder < 0) { yGrinder=0; xCrusher=cpDeficit/cpCr; }
+    } else if (isAvail('Crusher')) {
+      xCrusher = cpDeficit/cpCr;
+    } else {
+      yGrinder = cpDeficit/cpGr;
+    }
+    const needCalxForCP  = (xCrusher + yGrinder) * 10000;
+    const calxWaterForCP = yGrinder * calxGrinder.catAmt;
+    const cpFromCalx      = xCrusher*cpCr + yGrinder*cpGr;
+    const coalFromCalx    = xCrusher*coalCr + yGrinder*coalGr;
+
+    const netCoal   = Math.max(0, totalCoalNeed - coalFromCalx);
+    const coalBonus = Math.max(0, coalFromCalx - totalCoalNeed);
+    const cpBonus    = Math.max(0, cpFromCalx - cpDeficit);
+    const needCalxGrandTotal = needCalx + needCalxForCP;
+
+    const needWater= calsWater+sabWater+calxWaterForCP+(sel.mal===1?malCat:0);
 
     const tree=[
       {name:'Tindremic Messing',cls:'final',      amount:T,        prefix:''},
@@ -900,19 +986,32 @@ export const METALS = [
       {divider:true},
       {name:'Calspar',       cls:'intermediate',amount:needCals,    prefix:'         └─ '},
       {divider:true},
-      {name:'Calx',cls:'base-ore',amount:needCalx,prefix:'            ',tag:'mine',tagLabel:'руда'},
+      {name:'Calx (→ Calspar)',cls:'base-ore',amount:needCalx,prefix:'            ',tag:'mine',tagLabel:'руда'},
       ...(needRO>0?[{name:'Rock Oil',   cls:'base-buy', amount:needRO,   prefix:'            ',tag:'buy', tagLabel:'покупка'}]:[]),
       ...(needFS>0?[{name:'Fuming Salt',cls:'base-buy', amount:needFS,   prefix:'            ',tag:'buy', tagLabel:'покупка'}]:[]),
       ...(needBor>0?[{name:'Bor',       cls:'base-hard',amount:needBor,  prefix:'            ',tag:'hard',tagLabel:'сложно'}]:[]),
-      ...(needCoke>0?[{name:'Coke',     cls:'intermediate',amount:needCoke,prefix:'            '}]:[]),
       ...(needIchor>0?[{name:'Ichor',   cls:'base-buy', amount:needIchor,prefix:'            ',tag:'buy', tagLabel:'покупка'}]:[]),
       ...(needWater>0?[{name:'Water',   cls:'base-easy',amount:needWater,prefix:'            ',tag:'easy',tagLabel:'легко'}]:[]),
       {divider:true},
+
+      // ── Calx Powder / Coke (Almine — обязательный катализатор; Cuprum — опционально) ──
+      {name:'▸ CALX POWDER / COKE', cls:'tree-section', amount:0, prefix:''},
+      {name:'Calx Powder для Almine', cls:'intermediate', amount:alCat, prefix:'   ├─ '},
+      ...(cupCoke>0?[
+        {name:'Coke (для Cuprum)', cls:'intermediate', amount:cupCoke, prefix:'   ├─ '},
+        {name:'Coal для Coke', cls:'intermediate', amount:needCoal_coke, prefix:'   │  └─ '},
+      ]:[]),
+      {name:`Calx (${xCrusher.toFixed(1)} прог. Crusher + ${yGrinder.toFixed(1)} прог. Grinder — закрывает Calx Powder и Coal без остатка)`, cls:'base-ore', amount:needCalxForCP, prefix:'   └─ ', tag:'mine', tagLabel:'руда'},
+      {divider:true},
+
       {name:'── ИТОГО БАЗОВЫЕ РЕСУРСЫ ──', cls:'tree-section', amount:0, prefix:''},
       {divider:true},
       ...(granumForWS>0?[{name:'Granum', cls:'base-ore', amount:granumForWS, prefix:'', tag:'mine', tagLabel:'руда'}]:[]),
       ...(needSaburra>0?[{name:'Saburra',cls:'base-ore', amount:needSaburra, prefix:'', tag:'mine', tagLabel:'руда'}]:[]),
-      {name:'Calx', cls:'base-ore', amount:needCalx, prefix:'', tag:'mine', tagLabel:'руда'},
+      {name:'Calx', cls:'base-ore', amount:needCalxGrandTotal, prefix:'', tag:'mine', tagLabel:'руда'},
+      ...(cpBonus>0?[{name:'Calx Powder бонус (излишек)', cls:'base-easy', amount:cpBonus, prefix:'', tag:'easy', tagLabel:'бонус'}]:[]),
+      ...(coalBonus>0?[{name:'Coal бонус (излишек от Calx)', cls:'base-easy', amount:coalBonus, prefix:'', tag:'easy', tagLabel:'бонус'}]:[]),
+      ...(netCoal>0?[{name:'Coal (доп.)', cls:'base-ore', amount:netCoal, prefix:'', tag:'mine', tagLabel:'побочка'}]:[]),
       ...(needRO>0?[{name:'Rock Oil',    cls:'base-buy', amount:needRO,   prefix:'', tag:'buy',  tagLabel:'покупка'}]:[]),
       ...(needFS>0?[{name:'Fuming Salt', cls:'base-buy', amount:needFS,   prefix:'', tag:'buy',  tagLabel:'покупка'}]:[]),
       ...(needBor>0?[{name:'Bor',        cls:'base-hard',amount:needBor,  prefix:'', tag:'hard', tagLabel:'сложно'}]:[]),
@@ -1157,7 +1256,7 @@ export const METALS = [
 },
 {
   id:'bron', name:'Bron',
-  defaultSel:{cup:5, mal:7, cals:0, bleck:0, sab:1},
+  defaultSel:{cup:5, mal:7, cals:0, bleck:0, sab:1, coke:1, calx:1},
   steps:[
     {id:'cup', label:'Cuprum', options:[
       // Amarantum-based
@@ -1212,18 +1311,28 @@ export const METALS = [
       {label:'Crusher + Saburra',           furnace:'Crusher',input:'10 000 Saburra',             yield:2000, cat:null,    catAmt:0,   mal:1584},
       {label:'Grinder + Saburra + Water ★', furnace:'Grinder',input:'10 000 Saburra + 900 Water', yield:4275, cat:'Water', catAmt:900, mal:950,},
     ]},
+    {id:'coke', label:'Coke', options:[
+      {label:'Furnace + Coal + Coal',           furnace:'Furnace', input:'10 000 Coal + 600 Coal',        yield:7200, coalTotal:10600, useCalxPowder:false},
+      {label:'Furnace + Coal + Calx Powder ★',  furnace:'Furnace', input:'10 000 Coal + 720 Calx Powder', yield:7200, coalTotal:10000, useCalxPowder:true, calxPowderCat:720,},
+    ]},
+    {id:'calx', label:'Calx Powder', options:[
+      {label:'Crusher + Calx',           furnace:'Crusher', input:'10 000 Calx',               yield:1361, cat:null,    catAmt:0,    coal:2151},
+      {label:'Grinder + Calx + Water ★', furnace:'Grinder', input:'10 000 Calx + 1 000 Water', yield:2058, cat:'Water', catAmt:1000, coal:1140,},
+    ]},
   ],
-  calc(target, sel, bon={}) {
+  calc(target, sel, bon={}, tools={}) {
     const IM = bon.ironmaster ? 1.03 : 1;
     const EM = 1 + (bon.extractBonus||0)/100;
     const RO = 7000 * IM;
     const T  = target;
+    const isAvail = name => tools[name] !== false;
 
     const cupR   = this.steps[0].options[sel.cup??5];
     const malR   = this.steps[1].options[sel.mal??7];
     const calsR  = this.steps[2].options[sel.cals??0];
     const bleckR = this.steps[3].options[sel.bleck??0];
     const sabR   = this.steps[4].options[sel.sab??1];
+    const cokeR  = this.steps[5].options[sel.coke??1];
 
     // ── BRON: 10000 Cuprum + 5000 Bleck + 5000 Saburra Powder → RO ──
     const needCup   = r(T, RO, 10000);
@@ -1232,8 +1341,6 @@ export const METALS = [
 
     // ── SABURRA POWDER ──
     const sabYield    = sabR.yield * EM;
-    const needSaburra = r(needSP, sabYield, 10000);
-    const sabWater    = r(needSP, sabYield, sabR.catAmt);
     const malFromSab  = sabR.mal ? r(needSP, sabYield, sabR.mal) : 0;
 
     // ── CUPRUM ──
@@ -1247,8 +1354,6 @@ export const METALS = [
 
     let needMal_forCup = 0;
     if (cupR.base === 'Malachite') needMal_forCup = needCupBase;
-    let needElectrum_forCup = 0;
-    if (cupR.base === 'Electrum') needElectrum_forCup = needCupBase;
     let needAmarantum_forCup = 0;
     if (cupR.base === 'Amarantum') needAmarantum_forCup = needCupBase;
     const needGranum_cup = needAmarantum_forCup > 0 ? r(needAmarantum_forCup, 882*EM, 10000) : 0;
@@ -1284,12 +1389,13 @@ export const METALS = [
     }
 
     // ── CALX (для Malachite, если base=Calx) ──
-    let needCalx_mal = 0, malWater_calx = 0, calxPowderFromMalCalx = 0, coalFromMalCalx = 0;
+    let needCalx_mal = 0, malWater_calx = 0, calxPowderFromMalCalx = 0, coalFromMalCalx = 0, calsparFromMalCalx = 0;
     if (malR.base === 'Calx') {
       needCalx_mal = r(needMal_craft, malYield, 10000);
       malWater_calx = r(needMal_craft, malYield, malR.catAmt);
       calxPowderFromMalCalx = malR.calxPowder ? r(needMal_craft, malYield, malR.calxPowder) : 0;
       coalFromMalCalx = malR.coal ? r(needMal_craft, malYield, malR.coal) : 0;
+      calsparFromMalCalx = malR.calspar ? r(needMal_craft, malYield, malR.calspar) : 0;
     }
 
     // ── SABURRA (для Malachite, если base=Saburra) ──
@@ -1312,12 +1418,55 @@ export const METALS = [
     const needBleckBase = netBleck > 0 ? r(netBleck, bleckYield, 10000) : 0;
     const bleckCat = netBleck > 0 ? r(netBleck, bleckYield, bleckR.catAmt) : 0;
 
-    // ── CALX POWDER / CALX суммарно ──
+    // ── CALX POWDER: катализаторы Cuprum/Coke против побочек Calspar/Malachite-via-Calx ──
     const cpForCup = cupR.cat==='CalxPowder' ? r(needCup, cupYield, cupR.catAmt) : 0;
-    const totalCP  = cpForCup + calxPowderFromCals + calxPowderFromMalCalx;
+    const cpSupply = calxPowderFromCals + calxPowderFromMalCalx;
     const needCalxTotal = needCalx_cals + needCalx_mal;
 
-    const needWater = sabWater_sp + calsWater
+    // ── COAL / COKE: Cuprum и Malachite могут требовать Coal напрямую или через Coke ──
+    const cupCoal  = cupR.cat==='Coal' ? r(needCup, cupYield, cupR.catAmt) : 0;
+    const malCoke  = malR.cat==='Coke' ? malCat : 0;
+    const cupCoke  = cupR.cat==='Coke' ? r(needCup, cupYield, cupR.catAmt) : 0;
+    const totalCoke = malCoke + cupCoke;
+    const cokeYield = 7200 * EM;
+    const needCoal_coke = totalCoke > 0 ? r(totalCoke, cokeYield, cokeR.coalTotal) : 0;
+    const cpForCoke = (totalCoke > 0 && cokeR.useCalxPowder) ? r(totalCoke, cokeYield, cokeR.calxPowderCat) : 0;
+
+    // ── CALX POWDER дефицит: сколько докрафтить сверх побочек Calspar/Malachite ──
+    const cpDemand  = cpForCup + cpForCoke;
+    const cpDeficit = Math.max(0, cpDemand - cpSupply);
+
+    // ── CALX: смешиваем Crusher/Grinder, чтобы закрыть дефицит Calx Powder и Coal без остатка ──
+    // (Coal-побочка из Calspar/Malachite-via-Calx крафта засчитывается в счёт нужды заранее)
+    const coalPool = coalFromCals + coalFromMalCalx;
+    const totalCoalNeedGross = cupCoal + needCoal_coke;
+    const totalCoalNeed = Math.max(0, totalCoalNeedGross - coalPool);
+    const coalPoolBonus = Math.max(0, coalPool - totalCoalNeedGross);
+    const calxCrusher = this.steps[6].options[0], calxGrinder = this.steps[6].options[1];
+    const cpCr = calxCrusher.yield*EM, coalCr = calxCrusher.coal*EM;
+    const cpGr = calxGrinder.yield*EM, coalGr = calxGrinder.coal*EM;
+    let xCrusher = 0, yGrinder = 0;
+    if (isAvail('Crusher') && isAvail('Grinder')) {
+      const calxDet = cpCr*coalGr - cpGr*coalCr;
+      xCrusher = (cpDeficit*coalGr - totalCoalNeed*cpGr) / calxDet;
+      yGrinder = (cpCr*totalCoalNeed - coalCr*cpDeficit) / calxDet;
+      if (xCrusher < 0) { xCrusher=0; yGrinder=cpDeficit/cpGr; }
+      if (yGrinder < 0) { yGrinder=0; xCrusher=cpDeficit/cpCr; }
+    } else if (isAvail('Crusher')) {
+      xCrusher = cpDeficit/cpCr;
+    } else {
+      yGrinder = cpDeficit/cpGr;
+    }
+    const needCalxForCP  = (xCrusher + yGrinder) * 10000;
+    const calxWaterForCP = yGrinder * calxGrinder.catAmt;
+    const cpFromCalx      = xCrusher*cpCr + yGrinder*cpGr;
+    const coalFromCalx    = xCrusher*coalCr + yGrinder*coalGr;
+
+    const netCoal   = Math.max(0, totalCoalNeed - coalFromCalx);
+    const coalBonus = Math.max(0, coalFromCalx - totalCoalNeed) + coalPoolBonus;
+    const cpBonus    = Math.max(0, (cpSupply + cpFromCalx) - cpDemand);
+
+    const needWater = sabWater_sp + calsWater + calxWaterForCP
       + (malR.cat==='Water' ? malCat : 0)
       + (malR.base==='Calx' ? malWater_calx : 0)
       + (malR.base==='Saburra' ? sabMalWater : 0);
@@ -1335,6 +1484,7 @@ export const METALS = [
     const silverBonus    = cupR.silver ? r(needCup, cupYield, cupR.silver) : 0;
 
     const needGranum = needGranum_cup;
+    const needCalx_total = needCalxTotal + needCalxForCP;
 
     const tree = [
       {name:'Bron',        cls:'final',        amount:T,         prefix:''},
@@ -1392,13 +1542,30 @@ export const METALS = [
         {divider:true},
       ]:[]),
 
+      // ── Calx Powder / Coke (если Cuprum/Malachite требуют CalxPowder или Coke) ──
+      ...(cpDemand>0||totalCoalNeed>0?[
+        {name:'▸ CALX POWDER / COKE', cls:'tree-section', amount:0, prefix:''},
+        ...(cpForCup>0?[{name:'Calx Powder для Cuprum', cls:'intermediate', amount:cpForCup, prefix:'   ├─ '}]:[]),
+        ...(totalCoke>0?[
+          {name:'Coke (всего)', cls:'intermediate', amount:totalCoke, prefix:'   ├─ '},
+          {name:'Coal для Coke', cls:'intermediate', amount:needCoal_coke, prefix:'   │  └─ '},
+        ]:[]),
+        ...(calsparFromMalCalx>0?[{name:'Calspar (побочка из Malachite-via-Calx)', cls:'base-easy', amount:calsparFromMalCalx, prefix:'   ', tag:'easy', tagLabel:'побочка'}]:[]),
+        ...(coalFromMalCalx>0?[{name:'Coal (побочка из Malachite-via-Calx, засчитана)', cls:'base-easy', amount:coalFromMalCalx, prefix:'   ', tag:'easy', tagLabel:'побочка'}]:[]),
+        {name:`Calx (${xCrusher.toFixed(1)} прог. Crusher + ${yGrinder.toFixed(1)} прог. Grinder — закрывает Calx Powder и Coal без остатка)`, cls:'base-ore', amount:needCalxForCP, prefix:'   └─ ', tag:'mine', tagLabel:'руда'},
+        {divider:true},
+      ]:[]),
+
       // ── ИТОГО БАЗОВЫЕ
       {name:'── ИТОГО БАЗОВЫЕ РЕСУРСЫ ──', cls:'tree-section', amount:0, prefix:''},
       {divider:true},
       ...(needGranum>0?[{name:'Granum',      cls:'base-ore', amount:needGranum,     prefix:'', tag:'mine', tagLabel:'руда'}]:[]),
       ...(needBleckBase>0?[{name:'Bleckblende', cls:'base-ore', amount:needBleckBase, prefix:'', tag:'mine', tagLabel:'руда'}]:[]),
       ...(totalSaburra>0?[{name:'Saburra',    cls:'base-ore', amount:totalSaburra,   prefix:'', tag:'mine', tagLabel:'руда'}]:[]),
-      ...(needCalxTotal>0?[{name:'Calx',      cls:'base-ore', amount:needCalxTotal,  prefix:'', tag:'mine', tagLabel:'руда'}]:[]),
+      ...(needCalx_total>0?[{name:'Calx',     cls:'base-ore', amount:needCalx_total, prefix:'', tag:'mine', tagLabel:'руда'}]:[]),
+      ...(cpBonus>0?[{name:'Calx Powder бонус (излишек)', cls:'base-easy', amount:cpBonus, prefix:'', tag:'easy', tagLabel:'бонус'}]:[]),
+      ...(coalBonus>0?[{name:'Coal бонус (излишек от Calx)', cls:'base-easy', amount:coalBonus, prefix:'', tag:'easy', tagLabel:'бонус'}]:[]),
+      ...(netCoal>0?[{name:'Coal (доп.)', cls:'base-ore', amount:netCoal, prefix:'', tag:'mine', tagLabel:'побочка'}]:[]),
       ...(needBor>0?[{name:'Bor',             cls:'base-hard',amount:needBor,        prefix:'', tag:'hard', tagLabel:'сложно'}]:[]),
       ...(needIchor>0?[{name:'Ichor',         cls:'base-buy', amount:needIchor,      prefix:'', tag:'buy',  tagLabel:'покупка'}]:[]),
       ...(needDragonSalt>0?[{name:'Dragon Salt',cls:'base-buy',amount:needDragonSalt,prefix:'', tag:'buy',  tagLabel:'покупка'}]:[]),

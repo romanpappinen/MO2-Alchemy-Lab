@@ -1,5 +1,24 @@
 # Diary
 
+## 2026-07-18 — Remove dead code, fix hidden Coke/CalxPowder tracking bugs
+
+**What changed:** Started as a "remove dead code" task; mechanical `eslint --rule no-unused-vars` sweep across `craftConstants.js` surfaced several genuinely dead variables (harmless, removed) but also two real correctness bugs hiding behind "unused variable" warnings:
+
+1. **Messing and Bron silently dropped Coke/Coal requirements.** Selecting a Cuprum or Malachite recipe option catalyzed by Coke (e.g. "Fabricula + Malachite + Coke") computed `cupCoke`/`malCoke` and then discarded them — never added to any total, never shown in the tree. A player could pick that option and never learn they needed Coal-derived Coke.
+2. **Tindremic Messing dropped Almine's mandatory Calx Powder catalyst.** Both `al`-step options require 800 Calx Powder per batch unconditionally; the computed `alCat` was never used.
+
+Fixed by giving Messing, Bron, and Tindremic a proper Coal->Coke chain (new `coke` step, 2 options, matching Steel/Oghmium/Cronite/Tungsteel) and a dedicated `calx` step, then applying the same Crusher/Grinder auto-mix solver from the waste-minimization feature to satisfy both the Calx Powder deficit (demand minus existing Calspar/Malachite byproducts) and the Coal need (direct catalyst + Coke crafting, minus existing Calspar/Malachite-via-Calx byproducts) with minimal leftover. Also surfaced two previously-dropped byproducts as bonus rows: Calspar and Coal from the Malachite-via-Calx recipe path (`calsparFromMalCalx`, `coalFromMalCalx`).
+
+Dead code actually removed (no behavior change): `calxR`/`aBF_al`/`aBF_arc`/`alR`/`needGalb_lup_placeholder` in Oghmium (vestigial - the Almine/Arconite BF/GN mix has always used hardcoded constants, not the step selection), `needSaburra`/`sabWater`/`malFromCals` in Messing and Bron (superseded by the byproduct-netted `needSaburra_sp`/`sabWater_sp` computed later in the same function).
+
+**What was verified:**
+- `eslint --rule no-unused-vars`: zero remaining warnings in `craftConstants.js` (was ~15).
+- Cross-checked recipe data against `refineRecipes.js` again: 194/194 options match (was 182; +12 for the 6 new coke/calx step options added across Messing/Bron/Tindremic).
+- Swept every option of every step, times 5 tool-availability scenarios, times 5 target sizes, across all 7 metals (4,850 combinations): zero NaN/negative tree values.
+- Manually verified the Coke fix with before/after node scripts: selecting a Coke-catalyzed Cuprum/Malachite option in Messing/Bron now correctly shows "Coke (всего)" and "Coal для Coke" rows (previously silently 0).
+- Browser-driven check (Playwright + `npm run dev`): Messing, Bron, and Tindremic Messing all render their new CALX POWDER / COKE tree sections correctly with no console errors; Tindremic's numbers match the node-script verification exactly (Calx Powder для Almine: 2858, mix: 0.0 Crusher + 1.4 Grinder, Coal бонус: 1583).
+- `vue-tsc --build --force`: clean.
+
 ## 2026-07-18 — Fix Steel missing Pig Iron Sulfur option
 
 **What changed:** User asked whether switching Pig Iron's recipe from Coke to Sulfur (Blood Ore + Sulfur -> Pig Iron, no Coal/Coke chain needed) recalculates the whole tree. Investigating surfaced a real gap: Steel's `pig` step only had 2 options (Furnace/Blast Furnace, both Coke-based) — the "Furnace + Sulfur" option that Oghmium, Cronite, and Tungsteel all already have (and that exists in `refineRecipes.js`/`base_refine.txt`) was missing entirely from Steel. Added it, and fixed `calc()`: the old `cokePig = r(needPig, pR.yield*EM, pR.catAmt)` unconditionally treated `catAmt` as Coke regardless of recipe, so selecting the (until-now-nonexistent) Sulfur option would have silently miscounted its catalyst as Coke instead of Sulfur. Added the `pR.isSulfur` branch (matching the other 3 metals) and a `needSulfur` purchase row in Steel's tree (previously absent).
