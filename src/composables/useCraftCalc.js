@@ -5,6 +5,26 @@ import { METALS } from './craftConstants.js'
 const ALL_ORE_KEYS = ['Calx', 'Granum', 'Tephra', 'Gabore', 'Saburra', 'Bleckblende', 'Bor', 'Water', 'Fuming Salt', 'Rock Oil', 'Sulfur', 'Ichor', 'Dragon Salt']
 const PCT_COLORS = ['#c8922a', '#4a9e6a', '#4a7a9e', '#9e4a4a', '#7a4a9e', '#9e7a4a', '#4a9e9e', '#9e9e4a']
 
+// ── Tool/building availability ───────────────────────────────────────────
+// Not every player has access to every building. Options that use an
+// unavailable building are still shown (just sorted after available ones)
+// so nothing silently disappears from the recipe list.
+const BUILDINGS = ['Crusher', 'Grinder', 'Furnace', 'Blast Furnace', 'Greater Natorus', 'Natorus', 'Fabricula', 'Attractor']
+const TOOLS_KEY = 'craft_tools_v1'
+
+function loadAvailableTools () {
+  try {
+    const raw = localStorage.getItem(TOOLS_KEY)
+    if (raw) {
+      const saved = JSON.parse(raw)
+      return Object.fromEntries(BUILDINGS.map(b => [b, saved[b] !== false]))
+    }
+  } catch {
+    // ignore malformed storage, fall back to all-available
+  }
+  return Object.fromEntries(BUILDINGS.map(b => [b, true]))
+}
+
 const currentMetal = ref('oghmium')
 const targets = reactive({ oghmium: 10000, steel: 10000, messing: 10000, tindremic: 10000, cronite: 10000, bron: 10000, tungsteel: 10000 })
 const selections = reactive(Object.fromEntries(METALS.map(m => [m.id, { ...m.defaultSel }])))
@@ -14,6 +34,7 @@ let toastTimer = null
 
 const prices = reactive(Object.fromEntries(ALL_ORE_KEYS.map(k => [k, 0])))
 const priceMode = reactive({ absolute: true })
+const availableTools = reactive(loadAvailableTools())
 
 export function useCraftCalc () {
   const metals = METALS
@@ -116,6 +137,23 @@ export function useCraftCalc () {
     selections[currentMetal.value][stepId] = idx
   }
 
+  function isToolAvailable (furnace) {
+    return availableTools[furnace] !== false
+  }
+
+  function toggleTool (name) {
+    availableTools[name] = !availableTools[name]
+    localStorage.setItem(TOOLS_KEY, JSON.stringify({ ...availableTools }))
+  }
+
+  // Options paired with their real array index (needed by select/getSelIdx),
+  // sorted so available-tool options come first without reordering step.options.
+  function sortedOptions (step) {
+    return step.options
+      .map((opt, idx) => ({ opt, idx }))
+      .sort((a, b) => Number(!isToolAvailable(a.opt.furnace)) - Number(!isToolAvailable(b.opt.furnace)))
+  }
+
   function showToast (msg, success = false) {
     if (toastTimer) {
       clearTimeout(toastTimer)
@@ -170,5 +208,6 @@ export function useCraftCalc () {
     currentMetal, metals, metal, targets, selections, result, toast, bonuses,
     getSelIdx, getSelected, select, savePreset, loadPreset, fmt, fmtDec, isBestOpt,
     prices, priceMode, oreList, costData,
+    BUILDINGS, availableTools, isToolAvailable, toggleTool, sortedOptions,
   }
 }

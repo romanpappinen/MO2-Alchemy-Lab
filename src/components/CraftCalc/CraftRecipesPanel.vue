@@ -7,15 +7,17 @@
       </div>
       <div class="recipe-options">
         <div
-          v-for="(opt, idx) in step.options" :key="idx" class="recipe-opt"
-          :class="{selected: getSelIdx(step.id) === idx}" @click="select(step.id, idx)"
+          v-for="{ opt, idx } in sortedOptions(step)" :key="idx" class="recipe-opt"
+          :class="{selected: getSelIdx(step.id) === idx, unavailable: !isToolAvailable(opt.furnace)}"
+          @click="select(step.id, idx)"
         >
           <div class="recipe-opt-radio"><div class="recipe-opt-radio-dot"></div></div>
           <div class="recipe-opt-info">
             <div class="recipe-opt-name">{{ opt.label }}</div>
             <div class="recipe-opt-detail">{{ opt.furnace }} · {{ opt.input }}</div>
           </div>
-          <span v-if="isBestOpt(step, idx)" class="best-badge">{{ t('craft.best') }}</span>
+          <span v-if="!isToolAvailable(opt.furnace)" class="unavailable-badge">{{ t('craft.unavailable') }}</span>
+          <span v-else-if="isBestOpt(step, idx)" class="best-badge">{{ t('craft.best') }}</span>
           <span class="recipe-opt-yield">{{ (opt.yield || 0).toLocaleString('ru') }}</span>
         </div>
       </div>
@@ -28,5 +30,5 @@
   import { useCraftCalc } from '@/composables/useCraftCalc.js'
 
   const { t } = useI18n()
-  const { metal, getSelIdx, getSelected, select, isBestOpt } = useCraftCalc()
+  const { metal, getSelIdx, getSelected, select, isBestOpt, isToolAvailable, sortedOptions } = useCraftCalc()
 </script>
