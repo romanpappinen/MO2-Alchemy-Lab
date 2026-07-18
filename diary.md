@@ -127,3 +127,34 @@ Still open: waste-minimization recipe hints (mixing two recipe options in propor
 - Playwright: Skadite renders in RU and EN (subtitle "Fabricula · выход/yield 3 200 / craft", "3.13 crafts" at target 10 000), no Cyrillic leftovers in EN, no console errors; EN ore-price panel now lists Calx/Dragon Salt/Water (regression fixed); Oghmium's subtitle still reads "Refining Oven · yield 7 000 / craft".
 
 **Next concrete step:** the last open plan item — an in-repo automated test suite to replace the one-off scratchpad node scripts.
+
+## 2026-07-18 — Session stopped (handoff note)
+
+Stopped by user request right before writing the automated test suite — the
+last open PLAN.md item. Everything else in the session is done and committed:
+
+- `5757f1a` Saburra as a first-class Cuprum path (Messing/Bron/Tindremic + fixes)
+- `233ae6d` craftConstants.js comments translated to English
+- `0081bb1` Skadite added as the 8th metal + EN ore-price panel bugfix
+
+**Where the test work stood:** decision made (no vitest install — the repo has
+no test runner and network installs need explicit approval; use Node 22's
+built-in `node --test` instead, since `craftConstants.js`/`refineRecipes.js`
+are pure ESM with no Vue imports). A draft `tests/craftConstants.test.mjs` was
+prepared but NOT written to the repo. Planned contents, for whoever resumes:
+
+1. Data integrity: parse every step option's `input` string and match it
+   against `refineRecipes.js` (yield + byproduct fields), ~190 options.
+2. Alloy sanity: each Refining Oven metal has exactly one 10000+5000+5000→7000
+   alloy recipe; Skadite has none (Fabricula, craftYield 3200).
+3. Calc invariants: every option × tool combos × bonus combos × targets →
+   finite, non-negative tree amounts; linear scaling with target.
+4. Exactly one `totals:true` marker row per metal (the EN ore-price panel
+   depends on it).
+5. Perk semantics: ironmaster divides first-level needs by 1.03, leaves
+   Skadite untouched; extract bonus never increases ore needs.
+6. Regression pins with hand-derived numbers: Messing/Bron Saburra 126 262.63,
+   Bron Bleckblende fully covered (+11 666.67 bonus), Tindremic Saburra
+   ~180 374.9, Skadite 1-craft balance (Calx 558 035.71, Dragon Salt 4 190).
+
+Also add `"test": "node --test tests/"` to package.json scripts when landing.
