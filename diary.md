@@ -1,5 +1,15 @@
 # Diary
 
+## 2026-07-18 — Fix Steel missing Pig Iron Sulfur option
+
+**What changed:** User asked whether switching Pig Iron's recipe from Coke to Sulfur (Blood Ore + Sulfur -> Pig Iron, no Coal/Coke chain needed) recalculates the whole tree. Investigating surfaced a real gap: Steel's `pig` step only had 2 options (Furnace/Blast Furnace, both Coke-based) — the "Furnace + Sulfur" option that Oghmium, Cronite, and Tungsteel all already have (and that exists in `refineRecipes.js`/`base_refine.txt`) was missing entirely from Steel. Added it, and fixed `calc()`: the old `cokePig = r(needPig, pR.yield*EM, pR.catAmt)` unconditionally treated `catAmt` as Coke regardless of recipe, so selecting the (until-now-nonexistent) Sulfur option would have silently miscounted its catalyst as Coke instead of Sulfur. Added the `pR.isSulfur` branch (matching the other 3 metals) and a `needSulfur` purchase row in Steel's tree (previously absent).
+
+**What was verified:**
+- Confirmed the fix is fully reactive through the existing chain: switching Steel's Pig Iron to Sulfur drops Coke need (11796->10204 at target 10000), which lowers the Coal need feeding into the Crusher/Grinder Calx mix solver (6.4/8.5 runs -> 3.5/12.2), and adds a new Sulfur purchase line (2959) - confirmed with a before/after node script.
+- Re-ran the full cross-check against `refineRecipes.js`: 182/182 options now match (was 181; +1 for the new option).
+- Swept all metal/pig-option/tool-scenario/target combinations (180 total): zero NaN/negative tree values.
+- `vue-tsc --build --force` and `node --check`: clean.
+
 ## 2026-07-18 — Add structured refine-recipes data module
 
 **What changed:** Added `src/composables/refineRecipes.js`, transcribing and deduplicating the raw recipe dump in `base_refine.txt` (repo root, user-provided) into a structured `RECIPES` array — 8 top-level alloy recipes (`kind: 'alloy'`, base + 2 catalysts, "Refining Oven") and 75 deduplicated refine recipes (`kind: 'refine'`, base + 0-1 catalyst, building varies). Each `base_refine.txt` entry that listed the same (input, catalysts, building) combo once per producible output was collapsed into one recipe with a combined `outputs` array. Normalized the source typo `Cinnibar` → `Cinnabar`. Added a `findRecipesByOutput(materialName)` lookup helper.

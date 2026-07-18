@@ -395,6 +395,7 @@ export const METALS = [
     {id:'pig',label:'Pig Iron',options:[
       {label:'Furnace',        furnace:'Furnace',      input:'10 000 Blood Ore + 400 Coke',yield:4000,catAmt:400},
       {label:'Blast Furnace ★',furnace:'Blast Furnace',input:'10 000 Blood Ore + 390 Coke',yield:5000,catAmt:390},
+      {label:'Furnace + Sulfur',furnace:'Furnace',      input:'10 000 Blood Ore + 580 Sulfur',yield:4000,catAmt:580, isSulfur:true},
     ]},
     {id:'blo',label:'Blood Ore',options:[
       {label:'Grinder + Gabore + Bor',             furnace:'Grinder', input:'10 000 Gabore + 630 Bor',         yield:226, cat:'Bor',       catAmt:630,base:'Gabore'},
@@ -432,7 +433,8 @@ export const METALS = [
     const sabWater    = r(needSP,sR.yield*EM,sR.catAmt);
 
     const needBO  = r(needPig,pR.yield*EM,10000);
-    const cokePig = r(needPig,pR.yield*EM,pR.catAmt);
+    const cokePig  = pR.isSulfur ? 0 : r(needPig,pR.yield*EM,pR.catAmt);
+    const sulfurForPig = pR.isSulfur ? r(needPig,pR.yield*EM,pR.catAmt) : 0;
 
     const needBloBase = r(needBO,bR.yield*EM,10000);
     const bloCat      = r(needBO,bR.yield*EM,bR.catAmt);
@@ -476,6 +478,7 @@ export const METALS = [
 
     const needBor  = sel.blo===0?bloCat:0;
     const needWater= sabWater+calxWater;
+    const needSulfur = sulfurForPig;
 
     const tree=[
       {name:'Steel',       cls:'final',       amount:T,        prefix:''},
@@ -499,6 +502,7 @@ export const METALS = [
       ...(coalBonus>0?[{name:'Coal бонус (излишек от Calx)',cls:'base-easy',amount:coalBonus,prefix:'',tag:'easy',tagLabel:'бонус'}]:[]),
       ...(netCoal>0?[{name:'Coal',cls:'base-ore',amount:netCoal,prefix:'',tag:'mine',tagLabel:'побочка'}]:[]),
       ...(needBor>0?[{name:'Bor',cls:'base-hard',amount:needBor,prefix:'',tag:'hard',tagLabel:'сложно'}]:[]),
+      ...(needSulfur>0?[{name:'Sulfur',cls:'base-buy',amount:needSulfur,prefix:'',tag:'buy',tagLabel:'покупка'}]:[]),
       ...(needWater>0?[{name:'Water',cls:'base-easy',amount:needWater,prefix:'',tag:'easy',tagLabel:'легко'}]:[]),
     ];
     return {target:T, runs:T/7000, tree};
