@@ -44,7 +44,7 @@ export function useCraftCalc () {
     if (!metal.value) {
       return { target: 0, runs: 0, tree: [] }
     }
-    return metal.value.calc(targets[currentMetal.value] || 10000, selections[currentMetal.value] || {}, bonuses)
+    return metal.value.calc(targets[currentMetal.value] || 10000, selections[currentMetal.value] || {}, bonuses, availableTools)
   })
 
   // Dynamic ore list, read off the "base resources" summary section of the
