@@ -505,7 +505,7 @@ export const METALS = [
 },
 {
   id:'messing', name:'Messing',
-  defaultSel:{cup:5, mal:7, cals:0, sab:1, coke:1, calx:1},
+  defaultSel:{cup:5, mal:14, cals:0, sab:1, coke:1, calx:1},
   steps:[
     {id:'cup', label:'Cuprum', options:[
       // Amarantum-based
@@ -583,8 +583,6 @@ export const METALS = [
 
     // ── SABURRA POWDER ──
     const sabYield    = sabR.yield * EM;
-    // Malachite побочка из Saburra Powder рецептов
-    const malFromSab  = sabR.mal ? r(needSP, sabYield, sabR.mal) : 0;
 
     // ── MALACHITE для Cuprum (если нужен) ──
     const cupYield = cupR.yield * EM;
@@ -605,41 +603,54 @@ export const METALS = [
     // Amarantum → Granum
     const needGranum_cup = needAmarantum_forCup > 0 ? r(needAmarantum_forCup, 882*EM, 10000) : 0;
 
-    // ── CALSPAR для Malachite ──
-    // Malachite из Calspar, Calx или Saburra
+    // ── MALACHITE: из Saburra (совместно с SP — 2x2 решатель), либо из Calspar/Calx ──
     const malYield = malR.yield * EM;
+    let needMal_craft = 0, needCals_forMal = 0, calsYield = 0;
+    let malFromSab = 0, sabPFromMal = 0;
+    let needSaburra_mal = 0, needSaburra_sp = 0, sabWater_sp = 0;
+    let sabPBonus = 0, malSabBonus = 0;
 
-    // Сначала посчитаем сколько Malachite нужно из mal step
-    // Вычитаем побочки: из Saburra Powder крафта
-    const malPool_pre = malFromSab;
-
-    // Если mal step сам даёт Malachite из Calx или Saburra — это основной рецепт
-    let needMal_craft = 0; // сколько крафтить через mal step
-    let needCals_forMal = 0;
-    let calsYield = 0;
-
-    if (malR.base === 'Calspar') {
-      // Обычный путь: Calspar → Malachite
-      const netMal = Math.max(0, needMal_forCup - malPool_pre);
-      needMal_craft = netMal;
-      needCals_forMal = r(needMal_craft, malYield, 10000);
-      // Electrum побочка из Malachite
-    } else if (malR.base === 'Calx') {
-      // Calx → напрямую даёт и Calspar и Malachite
-      const netMal = Math.max(0, needMal_forCup - malPool_pre);
-      needMal_craft = netMal;
-      needCals_forMal = 0; // Calx идёт напрямую
-    } else if (malR.base === 'Saburra') {
-      // Saburra → Malachite (+ Saburra Powder побочка)
-      const netMal = Math.max(0, needMal_forCup - malPool_pre);
-      needMal_craft = netMal;
+    if (malR.base === 'Saburra') {
+      // Оба потока (SP-шаг и Malachite-шаг) дробят одну и ту же Saburra и дают
+      // оба продукта сразу — решаем 2x2 систему (как Crusher/Grinder для Calx),
+      // чтобы закрыть и Saburra Powder, и Malachite с минимальным излишком.
+      const spS = sabYield,               malS = (sabR.mal||0) * EM;
+      const spM = (malR.saburraP||0)*EM,  malM = malYield;
+      const det = spS*malM - spM*malS;
+      let S = 0, M = 0;
+      if (Math.abs(det) < 1e-9) {
+        // в обоих шагах выбран один и тот же рецепт — один поток закрывает оба продукта
+        S = Math.max(needSP/spS, malS > 0 ? needMal_forCup/malS : 0);
+      } else {
+        S = (needSP*malM - needMal_forCup*spM) / det;
+        M = (spS*needMal_forCup - malS*needSP) / det;
+        if (S < 0) { S = 0; M = Math.max(spM > 0 ? needSP/spM : 0, needMal_forCup/malM); }
+        if (M < 0) { M = 0; S = Math.max(needSP/spS, malS > 0 ? needMal_forCup/malS : 0); }
+      }
+      needSaburra_sp  = S * 10000;
+      needSaburra_mal = M * 10000;
+      sabWater_sp  = S * sabR.catAmt;
+      malFromSab   = S * malS;
+      sabPFromMal  = M * spM;
+      needMal_craft = M * malM;
+      const spProduced  = S*spS + M*spM;
+      const malProduced = S*malS + M*malM;
+      sabPBonus   = Math.max(0, spProduced - needSP);
+      malSabBonus = Math.max(0, malProduced - needMal_forCup);
+    } else {
+      // Malachite из Calspar или Calx; SP-шаг всё равно даёт Malachite побочкой
+      malFromSab = sabR.mal ? r(needSP, sabYield, sabR.mal) : 0;
+      needMal_craft = Math.max(0, needMal_forCup - malFromSab);
+      if (malR.base === 'Calspar') {
+        needCals_forMal = r(needMal_craft, malYield, 10000);
+      }
+      needSaburra_sp = r(needSP, sabYield, 10000);
+      sabWater_sp    = r(needSP, sabYield, sabR.catAmt);
     }
 
     const malCat = needMal_craft > 0 ? r(needMal_craft, malYield, malR.catAmt) : 0;
     const electrumFromMal = (malR.electrum && needMal_craft > 0) ? r(needMal_craft, malYield, malR.electrum) : 0;
     const chalkGlanceBonus = (malR.chalkGlance && needMal_craft > 0) ? r(needMal_craft, malYield, malR.chalkGlance) : 0;
-    // Saburra Powder побочка из Saburra Malachite рецепта
-    const sabPFromMal = (malR.saburraP && needMal_craft > 0) ? r(needMal_craft, malYield, malR.saburraP) : 0;
 
     // ── CALSPAR (отдельный step, если нужен) ──
     calsYield = calsR.yield * EM;
@@ -658,30 +669,17 @@ export const METALS = [
     }
 
     // ── CALX (для Calspar, или напрямую для Malachite) ──
-    let needCalx_mal = 0, malWater_calx = 0, calxPowderFromMalCalx = 0, coalFromMalCalx = 0, calsparFromMalCalx = 0;
+    let needCalx_mal = 0, calxPowderFromMalCalx = 0, coalFromMalCalx = 0, calsparFromMalCalx = 0;
     if (malR.base === 'Calx') {
       needCalx_mal = r(needMal_craft, malYield, 10000);
-      malWater_calx = r(needMal_craft, malYield, malR.catAmt);
       calxPowderFromMalCalx = malR.calxPowder ? r(needMal_craft, malYield, malR.calxPowder) : 0;
       coalFromMalCalx = malR.coal ? r(needMal_craft, malYield, malR.coal) : 0;
       calsparFromMalCalx = malR.calspar ? r(needMal_craft, malYield, malR.calspar) : 0;
     }
 
-    // ── SABURRA (для Saburra Powder катализатора + Malachite рецепта) ──
-    let needSaburra_mal = 0, sabMalWater = 0;
-    if (malR.base === 'Saburra') {
-      needSaburra_mal = r(needMal_craft, malYield, 10000);
-      sabMalWater = r(needMal_craft, malYield, malR.catAmt);
-    }
-    // Суммарно Saburra (для SP катализатора + для Malachite)
-    // Saburra Powder побочка из Saburra Malachite покрывает часть needSP
-    const sabPPool = malFromSab + sabPFromMal;
-    const netSabP  = Math.max(0, needSP - sabPPool);
-    const sabPBonus= Math.max(0, sabPPool - needSP);
-    // Пересчитываем Saburra для SP если пул покрывает
-    const needSaburra_sp = netSabP > 0 ? r(netSabP, sabYield, 10000) : 0;
-    const sabWater_sp    = netSabP > 0 ? r(netSabP, sabYield, sabR.catAmt) : 0;
-    const totalSaburra   = needSaburra_sp + needSaburra_mal;
+    // ── SABURRA суммарно ──
+    const sabPPool = sabPFromMal; // SP, пришедший побочкой из Malachite-шага
+    const totalSaburra = needSaburra_sp + needSaburra_mal;
 
     // ── CALX POWDER: катализаторы Cuprum/Coke против побочек Calspar/Malachite-via-Calx ──
     const cpForCup = cupR.cat==='CalxPowder' ? r(needCup, cupYield, cupR.catAmt) : 0;
@@ -738,10 +736,10 @@ export const METALS = [
     const needCalx_total = needCalxTotal + needCalxForCP;
 
     // ── ИТОГО ВОДА ──
+    // (malWater_calx/sabMalWater численно равны malCat при водном катализаторе —
+    // учитываем один раз через malCat, иначе вода задваивается)
     const needWater = sabWater_sp + calsWater + calxWaterForCP
-      + (malR.cat==='Water' ? malCat : 0)
-      + (malR.base==='Calx' ? malWater_calx : 0)
-      + (malR.base==='Saburra' ? sabMalWater : 0);
+      + (malR.cat==='Water' ? malCat : 0);
 
     // ── БОР ──
     const needBor = (cupR.cat==='Bor' ? r(needCup, cupYield, cupR.catAmt) : 0)
@@ -778,8 +776,8 @@ export const METALS = [
       // ── Saburra Powder
       {name:'▸ SABURRA POWDER', cls:'tree-section', amount:0, prefix:''},
       ...(sabPPool>0?[{name:t('tree.itemFromPoolN',{item:'Saburra Powder',n:Math.round(Math.min(sabPPool,needSP)).toLocaleString('ru')}), cls:'base-easy', amount:Math.min(sabPPool,needSP), prefix:'   ', tag:'easy', tagLabel:'byproduct'}]:[]),
-      ...(sabPBonus>0?[{name:t('tree.itemBonus',{item:'Saburra Powder'}), cls:'base-easy', amount:sabPBonus, prefix:'   ', tag:'easy', tagLabel:'bonus'}]:[]),
-      ...(netSabP>0?[{name:t('tree.xToYCraftMore',{x:'Saburra',y:'Saburra Powder'}), cls:'intermediate', amount:needSaburra_sp, prefix:'   └─ '}]:[]),
+      ...(sabPBonus>0?[{name:t('tree.bonusParen',{item:'Saburra Powder'}), cls:'base-easy', amount:sabPBonus, prefix:'   ', tag:'easy', tagLabel:'bonus'}]:[]),
+      ...(needSaburra_sp>0?[{name:t('tree.xToYCraftMore',{x:'Saburra',y:'Saburra Powder'}), cls:'intermediate', amount:needSaburra_sp, prefix:'   └─ '}]:[]),
       {divider:true},
 
       // ── Malachite
@@ -790,6 +788,7 @@ export const METALS = [
       ...(malR.base==='Calspar'?[{name:t('tree.xToY',{x:'Calspar',y:'Malachite'}), cls:'intermediate', amount:needCals_forMal, prefix:'      └─ '}]:[]),
       ...(malR.base==='Calx'?[{name:t('tree.xToY',{x:'Calx',y:'Malachite'}), cls:'intermediate', amount:needCalx_mal, prefix:'      └─ '}]:[]),
       ...(malR.base==='Saburra'?[{name:t('tree.xToY',{x:'Saburra',y:'Malachite'}), cls:'intermediate', amount:needSaburra_mal, prefix:'      └─ '}]:[]),
+      ...(malSabBonus>0?[{name:t('tree.bonusParen',{item:'Malachite'}), cls:'base-easy', amount:malSabBonus, prefix:'      ', tag:'easy', tagLabel:'bonus'}]:[]),
       ...(electrumFromMal>0?[{name:t('tree.byproductParenFrom',{item:'Electrum',source:'Malachite'}), cls:'base-easy', amount:electrumFromMal, prefix:'      ', tag:'easy', tagLabel:'byproduct'}]:[]),
       ...(chalkGlanceBonus>0?[{name:t('tree.byproductParen',{item:'Chalk Glance'}), cls:'base-easy', amount:chalkGlanceBonus, prefix:'      ', tag:'easy', tagLabel:'bonus'}]:[]),
       ...(sabPFromMal>0?[{name:t('tree.byproductParenFrom',{item:'Saburra Powder',source:'Saburra'}), cls:'base-easy', amount:sabPFromMal, prefix:'      ', tag:'easy', tagLabel:'byproduct'}]:[]),

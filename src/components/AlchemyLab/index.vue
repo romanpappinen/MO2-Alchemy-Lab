@@ -6,12 +6,6 @@
         <p class="logo-sub">{{ t('app.subtitle') }}</p>
       </div>
       <div class="top-actions">
-        <!-- Language switcher -->
-        <div class="lang-switch">
-          <button class="lang-btn" :class="{active: locale==='ru'}" @click="setLocale('ru')">RU</button>
-          <span class="lang-sep">·</span>
-          <button class="lang-btn" :class="{active: locale==='en'}" @click="setLocale('en')">EN</button>
-        </div>
         <button class="btn btn-primary" @click="onAdd">
           {{ activeTab === 'ingredients' ? t('btn.addReagent') : t('btn.newRecipe') }}
         </button>
@@ -53,7 +47,7 @@
   import PotionSection from './PotionSection.vue'
   import WizardModal from './WizardModal.vue'
 
-  const { t, locale, setLocale } = useI18n()
+  const { t } = useI18n()
   const { toast, library, openModal, loadLibrary } = useAlchemyStore()
   const { potionList, openPotionModal, loadPotions } = usePotionStore()
 
@@ -110,12 +104,6 @@ select{cursor:pointer}
 .logo em{color:var(--accent2);font-style:normal}
 .logo-sub{font-size:11px;color:var(--dim);margin-top:1px;letter-spacing:.04em;text-transform:uppercase}
 .top-actions{display:flex;align-items:center;gap:12px}
-
-.lang-switch{display:flex;align-items:center;gap:4px;background:var(--s2);border:1px solid var(--border);border-radius:7px;padding:3px 4px}
-.lang-sep{color:var(--dim);font-size:11px}
-.lang-btn{background:transparent;border:none;cursor:pointer;font-size:12px;font-weight:500;font-family:var(--mono);color:var(--muted);padding:3px 8px;border-radius:5px;transition:all .15s}
-.lang-btn:hover{color:var(--text)}
-.lang-btn.active{background:var(--accent-glow);color:var(--accent2);border:1px solid rgba(107,94,247,.3)}
 
 .tab-bar{display:flex;margin-bottom:20px;border-bottom:1px solid var(--border)}
 .tab{display:flex;align-items:center;gap:7px;padding:9px 20px;background:transparent;border:none;border-bottom:2px solid transparent;margin-bottom:-1px;cursor:pointer;font-size:13px;font-weight:500;font-family:var(--ui);color:var(--muted);transition:all .15s}

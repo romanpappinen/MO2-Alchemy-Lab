@@ -1,6 +1,6 @@
 <script lang="ts" setup>
-  import AlchemyLab from '@/components/AlchemyLab/index.vue'
+  import AppShell from '@/components/AppShell/index.vue'
 </script>
 <template>
-  <AlchemyLab />
+  <AppShell />
 </template>
