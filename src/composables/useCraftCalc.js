@@ -27,7 +27,7 @@ function loadAvailableTools () {
 }
 
 const currentMetal = ref('oghmium')
-const targets = reactive({ oghmium: 10000, steel: 10000, messing: 10000, tindremic: 10000, cronite: 10000, bron: 10000, tungsteel: 10000 })
+const targets = reactive({ oghmium: 10000, steel: 10000, messing: 10000, tindremic: 10000, cronite: 10000, bron: 10000, tungsteel: 10000, skadite: 10000 })
 const selections = reactive(Object.fromEntries(METALS.map(m => [m.id, { ...m.defaultSel }])))
 const bonuses = reactive({ ironmaster: false, extractBonus: 0 })
 const toast = reactive({ show: false, msg: '', success: false })
@@ -57,7 +57,7 @@ export function useCraftCalc () {
     const found = []
     const seen = new Set()
     for (const node of tree) {
-      if (node.name && node.name.includes('ИТОГО БАЗОВЫЕ')) {
+      if (node.totals) {
         inSummary = true
         continue
       }
@@ -78,7 +78,7 @@ export function useCraftCalc () {
     let inSummary = false
     const seen = new Map()
     for (const node of tree) {
-      if (node.name && node.name.includes('ИТОГО БАЗОВЫЕ')) {
+      if (node.totals) {
         inSummary = true
         continue
       }

@@ -7,7 +7,7 @@
         <div class="page-header">
           <div>
             <div class="page-title">{{ metal.name }}</div>
-            <div class="page-subtitle">{{ t('craft.furnaceSubtitle') }}</div>
+            <div class="page-subtitle">{{ t('craft.furnaceSubtitle', { furnace: metal.furnace || 'Refining Oven', n: (metal.craftYield || 7000).toLocaleString('ru-RU') }) }}</div>
           </div>
           <div class="target-block">
             <label>{{ t('craft.target') }}</label>

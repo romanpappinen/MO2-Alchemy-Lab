@@ -358,7 +358,7 @@ export const METALS = [
       ...(coalBonus>0?[{name:t('tree.bonusArrowExtra',{item:'Coal',source:'Calx'}), cls:'base-easy', amount:coalBonus, prefix:'   │     ', tag:'easy', tagLabel:'bonus'}]:[]),
       {divider:true},
       // ── totals
-      {name:t('tree.totalBaseResources'), cls:'tree-section', amount:0, prefix:''},
+      {name:t('tree.totalBaseResources'), cls:'tree-section', amount:0, prefix:'', totals:true},
       {divider:true},
       ...(needGranum>0?[{name:'Granum',   cls:'base-ore',  amount:needGranum,   prefix:'', tag:'mine', tagLabel:'ore'}]:[]),
       ...(needGabore>0?[{name:'Gabore',   cls:'base-ore',  amount:needGabore,   prefix:'', tag:'mine', tagLabel:'ore'}]:[]),
@@ -488,7 +488,7 @@ export const METALS = [
       {divider:true},
       {name:'Blood Ore',   cls:'intermediate',amount:needBO,     prefix:'      └─ '},
       {divider:true},
-      {name:t('tree.totalBaseResources'), cls:'tree-section', amount:0, prefix:''},
+      {name:t('tree.totalBaseResources'), cls:'tree-section', amount:0, prefix:'', totals:true},
       {divider:true},
       ...(needGranum>0?[{name:'Granum',cls:'base-ore',amount:needGranum,prefix:'',tag:'mine',tagLabel:'ore'}]:[]),
       ...(needGabore>0?[{name:'Gabore',cls:'base-ore',amount:needGabore,prefix:'',tag:'mine',tagLabel:'ore'}]:[]),
@@ -819,7 +819,7 @@ export const METALS = [
       ]:[]),
 
       // ── totals
-      {name:t('tree.totalBaseResources'), cls:'tree-section', amount:0, prefix:''},
+      {name:t('tree.totalBaseResources'), cls:'tree-section', amount:0, prefix:'', totals:true},
       {divider:true},
       ...(needGranum>0?[{name:'Granum',  cls:'base-ore', amount:needGranum,    prefix:'', tag:'mine', tagLabel:'ore'}]:[]),
       ...(totalSaburra>0?[{name:'Saburra',cls:'base-ore',amount:totalSaburra,  prefix:'', tag:'mine', tagLabel:'ore'}]:[]),
@@ -1056,7 +1056,7 @@ export const METALS = [
       {name:t('tree.calxMix',{x:xCrusher.toFixed(1),y:yGrinder.toFixed(1)}), cls:'base-ore', amount:needCalxForCP, prefix:'   └─ ', tag:'mine', tagLabel:'ore'},
       {divider:true},
 
-      {name:t('tree.totalBaseResources'), cls:'tree-section', amount:0, prefix:''},
+      {name:t('tree.totalBaseResources'), cls:'tree-section', amount:0, prefix:'', totals:true},
       {divider:true},
       ...(granumForWS>0?[{name:'Granum', cls:'base-ore', amount:granumForWS, prefix:'', tag:'mine', tagLabel:'ore'}]:[]),
       ...(needSaburra>0?[{name:'Saburra',cls:'base-ore', amount:needSaburra, prefix:'', tag:'mine', tagLabel:'ore'}]:[]),
@@ -1290,7 +1290,7 @@ export const METALS = [
       {name:t('tree.calxMix',{x:xCrusher.toFixed(1),y:yGrinder.toFixed(1)}), cls:'base-ore', amount:needCalx_total, prefix:'   └─ ', tag:'mine', tagLabel:'ore'},
       {divider:true},
       // totals
-      {name:t('tree.totalBaseResources'), cls:'intermediate', amount:0, prefix:''},
+      {name:t('tree.totalBaseResources'), cls:'intermediate', amount:0, prefix:'', totals:true},
       {divider:true},
       ...(needGranum>0?[{name:'Granum',  cls:'base-ore',  amount:needGranum,  prefix:'', tag:'mine', tagLabel:'ore'}]:[]),
       ...(needGabore>0?[{name:'Gabore',  cls:'base-ore',  amount:needGabore,  prefix:'', tag:'mine', tagLabel:'ore'}]:[]),
@@ -1636,7 +1636,7 @@ export const METALS = [
       ]:[]),
 
       // ── totals
-      {name:t('tree.totalBaseResources'), cls:'tree-section', amount:0, prefix:''},
+      {name:t('tree.totalBaseResources'), cls:'tree-section', amount:0, prefix:'', totals:true},
       {divider:true},
       ...(needGranum>0?[{name:'Granum',      cls:'base-ore', amount:needGranum,     prefix:'', tag:'mine', tagLabel:'ore'}]:[]),
       ...(needBleckOre>0?[{name:'Bleckblende', cls:'base-ore', amount:needBleckOre, prefix:'', tag:'mine', tagLabel:'ore'}]:[]),
@@ -1872,7 +1872,7 @@ export const METALS = [
       {name:t('tree.itemTotalParen',{item:'Calx Powder'}), cls:'intermediate', amount:totalCP, prefix:'   ├─ '},
       {name:t('tree.calxMix',{x:xCrusher.toFixed(1),y:yGrinder.toFixed(1)}), cls:'base-ore', amount:needCalxTotal, prefix:'   │  └─ ', tag:'mine', tagLabel:'ore'},
       {divider:true},
-      {name:t('tree.totalBaseResources'), cls:'tree-section', amount:0, prefix:''},
+      {name:t('tree.totalBaseResources'), cls:'tree-section', amount:0, prefix:'', totals:true},
       {divider:true},
       ...(needGranum>0?[{name:'Granum', cls:'base-ore', amount:needGranum, prefix:'', tag:'mine', tagLabel:'ore'}]:[]),
       ...(needGabore>0?[{name:'Gabore', cls:'base-ore', amount:needGabore, prefix:'', tag:'mine', tagLabel:'ore'}]:[]),
@@ -1887,6 +1887,174 @@ export const METALS = [
     ];
 
     return { target:T, runs:T/7000, tree };
+  }
+},
+{
+  id:'skadite', name:'Skadite',
+  // Not a Refining Oven alloy: a plain refine step in the Fabricula
+  // (10000 Chalk Glance + catalyst → 3200 Skadite), so Ironmaster does not
+  // apply anywhere in this chain and runs are counted per Fabricula craft.
+  furnace:'Fabricula', craftYield:3200,
+  defaultSel:{skad:0, cg:0, cals:2, coke:1, calx:1},
+  steps:[
+    {id:'skad', label:'Skadite', options:[
+      {label:'Fabricula + Chalk Glance + Dragon Salt ★', furnace:'Fabricula', input:'10 000 Chalk Glance + 190 Dragon Salt', yield:3200, cat:'DragonSalt', catAmt:190,},
+      {label:'Fabricula + Chalk Glance + Ichor',         furnace:'Fabricula', input:'10 000 Chalk Glance + 800 Ichor',       yield:3200, cat:'Ichor',      catAmt:800},
+    ]},
+    // Chalk Glance is elsewhere a Malachite-recipe byproduct; here it is the
+    // driven output, so Malachite/Electrum flip into byproducts.
+    {id:'cg', label:'Chalk Glance', options:[
+      {label:'BF + Calspar + Dragon Salt ★',   furnace:'Blast Furnace',input:'10 000 Calspar + 280 Dragon Salt', yield:700, cat:'DragonSalt', catAmt:280,  mal:2064, electrum:224,},
+      {label:'BF + Calspar + Ichor',            furnace:'Blast Furnace',input:'10 000 Calspar + 1 000 Ichor',     yield:490, cat:'Ichor',      catAmt:1000, mal:3302, electrum:425},
+      {label:'BF + Calspar + Sulfur',           furnace:'Blast Furnace',input:'10 000 Calspar + 490 Sulfur',      yield:448, cat:'Sulfur',     catAmt:490,  mal:2373, electrum:291},
+      {label:'Fabricula + Calspar + Dragon Salt',furnace:'Fabricula',   input:'10 000 Calspar + 190 Dragon Salt', yield:420, cat:'DragonSalt', catAmt:190},
+      {label:'Furnace + Calspar + Dragon Salt', furnace:'Furnace',      input:'10 000 Calspar + 133 Dragon Salt', yield:245, cat:'DragonSalt', catAmt:133,  mal:1444, electrum:88},
+      {label:'Fabricula + Calspar + Ichor',     furnace:'Fabricula',    input:'10 000 Calspar + 1 000 Ichor',     yield:210, cat:'Ichor',      catAmt:1000, mal:1375, electrum:336},
+      {label:'Fabricula + Calspar + Sulfur',    furnace:'Fabricula',    input:'10 000 Calspar + 700 Sulfur',      yield:167, cat:'Sulfur',     catAmt:700,  mal:334,  electrum:112},
+      {label:'Furnace + Calspar + Ichor',       furnace:'Furnace',      input:'10 000 Calspar + 700 Ichor',       yield:159, cat:'Ichor',      catAmt:700,  mal:2793, electrum:211},
+      {label:'Furnace + Calspar + Sulfur',      furnace:'Furnace',      input:'10 000 Calspar + 490 Sulfur',      yield:142, cat:'Sulfur',     catAmt:490,  mal:1781, electrum:129},
+      {label:'Furnace + Calspar + Bor',         furnace:'Furnace',      input:'10 000 Calspar + 630 Bor',         yield:73,  cat:'Bor',        catAmt:630,  mal:4816, electrum:294},
+      {label:'Furnace + Calspar + Coke',        furnace:'Furnace',      input:'10 000 Calspar + 341 Coke',        yield:73,  cat:'Coke',       catAmt:341,  mal:3295, electrum:211},
+      {label:'Furnace + Calspar + Water',       furnace:'Furnace',      input:'10 000 Calspar + 1 000 Water',     yield:72,  cat:'Water',      catAmt:1000, mal:3467, electrum:108},
+    ]},
+    {id:'cals', label:'Calspar', options:[
+      {label:'Crusher + Calx',           furnace:'Crusher',input:'10 000 Calx',               yield:360,  cat:null,    catAmt:0,    mal:891,  calxPowder:1361, coal:2151},
+      {label:'Grinder + Calx + Water',   furnace:'Grinder',input:'10 000 Calx + 1 000 Water', yield:2000, cat:'Water', catAmt:1000, mal:528,  calxPowder:2058, coal:1140},
+      {label:'Furnace + Calx + Water ★', furnace:'Furnace',input:'10 000 Calx + 1 000 Water', yield:2560, cat:'Water', catAmt:1000, mal:506, },
+    ]},
+    {id:'coke', label:'Coke', options:[
+      {label:'Furnace + Coal + Coal',           furnace:'Furnace', input:'10 000 Coal + 600 Coal',        yield:7200, coalTotal:10600, useCalxPowder:false},
+      {label:'Furnace + Coal + Calx Powder ★',  furnace:'Furnace', input:'10 000 Coal + 720 Calx Powder', yield:7200, coalTotal:10000, useCalxPowder:true, calxPowderCat:720,},
+    ]},
+    {id:'calx', label:'Calx Powder', options:[
+      {label:'Crusher + Calx',           furnace:'Crusher', input:'10 000 Calx',               yield:1361, cat:null,    catAmt:0,    coal:2151},
+      {label:'Grinder + Calx + Water ★', furnace:'Grinder', input:'10 000 Calx + 1 000 Water', yield:2058, cat:'Water', catAmt:1000, coal:1140,},
+    ]},
+  ],
+  calc(target, sel, bon={}, tools={}, t=(k)=>k) {
+    const EM = 1 + (bon.extractBonus||0)/100;
+    const T  = target;
+    const isAvail = name => tools[name] !== false;
+
+    const skadR = this.steps[0].options[sel.skad??0];
+    const cgR   = this.steps[1].options[sel.cg??0];
+    const calsR = this.steps[2].options[sel.cals??2];
+    const cokeR = this.steps[3].options[sel.coke??1];
+
+    // ── SKADITE: 10000 Chalk Glance + catalyst → 3200 (Fabricula) ──
+    const skadYield = skadR.yield * EM;
+    const needCG   = r(T, skadYield, 10000);
+    const skadCat  = r(T, skadYield, skadR.catAmt);
+
+    // ── CHALK GLANCE ← Calspar ──
+    const cgYield = cgR.yield * EM;
+    const needCals = r(needCG, cgYield, 10000);
+    const cgCat    = r(needCG, cgYield, cgR.catAmt);
+    const malBonus      = cgR.mal      ? r(needCG, cgYield, cgR.mal)      : 0;
+    const electrumBonus = cgR.electrum ? r(needCG, cgYield, cgR.electrum) : 0;
+
+    // ── CALSPAR ← Calx ──
+    const calsYield = calsR.yield * EM;
+    const needCalx_cals = r(needCals, calsYield, 10000);
+    const calsWater     = r(needCals, calsYield, calsR.catAmt);
+    const malFromCalsStep    = calsR.mal        ? r(needCals, calsYield, calsR.mal)        : 0;
+    const calxPowderFromCals = calsR.calxPowder ? r(needCals, calsYield, calsR.calxPowder) : 0;
+    const coalFromCals       = calsR.coal       ? r(needCals, calsYield, calsR.coal)       : 0;
+
+    // ── COKE (only if the Chalk Glance catalyst is Coke) ──
+    const totalCoke = cgR.cat==='Coke' ? cgCat : 0;
+    const cokeYield = 7200 * EM;
+    const needCoal_coke = totalCoke > 0 ? r(totalCoke, cokeYield, cokeR.coalTotal) : 0;
+    const cpForCoke = (totalCoke > 0 && cokeR.useCalxPowder) ? r(totalCoke, cokeYield, cokeR.calxPowderCat) : 0;
+
+    // ── CALX POWDER deficit: how much to craft beyond the Calspar byproduct ──
+    const cpDemand  = cpForCoke;
+    const cpDeficit = Math.max(0, cpDemand - calxPowderFromCals);
+
+    // ── CALX: mix Crusher/Grinder to cover the Calx Powder deficit and Coal with no leftover ──
+    // (the Coal byproduct of the Calspar craft is credited toward the need up front)
+    const coalPool = coalFromCals;
+    const totalCoalNeedGross = needCoal_coke;
+    const totalCoalNeed = Math.max(0, totalCoalNeedGross - coalPool);
+    const coalPoolBonus = Math.max(0, coalPool - totalCoalNeedGross);
+    const calxCrusher = this.steps[4].options[0], calxGrinder = this.steps[4].options[1];
+    const cpCr = calxCrusher.yield*EM, coalCr = calxCrusher.coal*EM;
+    const cpGr = calxGrinder.yield*EM, coalGr = calxGrinder.coal*EM;
+    let xCrusher = 0, yGrinder = 0;
+    if (isAvail('Crusher') && isAvail('Grinder')) {
+      const calxDet = cpCr*coalGr - cpGr*coalCr;
+      xCrusher = (cpDeficit*coalGr - totalCoalNeed*cpGr) / calxDet;
+      yGrinder = (cpCr*totalCoalNeed - coalCr*cpDeficit) / calxDet;
+      if (xCrusher < 0) { xCrusher=0; yGrinder=cpDeficit/cpGr; }
+      if (yGrinder < 0) { yGrinder=0; xCrusher=cpDeficit/cpCr; }
+    } else if (isAvail('Crusher')) {
+      xCrusher = cpDeficit/cpCr;
+    } else {
+      yGrinder = cpDeficit/cpGr;
+    }
+    const needCalxForCP  = (xCrusher + yGrinder) * 10000;
+    const calxWaterForCP = yGrinder * calxGrinder.catAmt;
+    const cpFromCalx      = xCrusher*cpCr + yGrinder*cpGr;
+    const coalFromCalx    = xCrusher*coalCr + yGrinder*coalGr;
+
+    const netCoal   = Math.max(0, totalCoalNeed - coalFromCalx);
+    const coalBonus = Math.max(0, coalFromCalx - totalCoalNeed) + coalPoolBonus;
+    const cpBonus   = Math.max(0, (calxPowderFromCals + cpFromCalx) - cpDemand);
+
+    // ── BASE ORES / CATALYSTS ──
+    const needCalx_total = needCalx_cals + needCalxForCP;
+    const needWater = calsWater + calxWaterForCP + (cgR.cat==='Water' ? cgCat : 0);
+    const needBor   = cgR.cat==='Bor' ? cgCat : 0;
+    const needDragonSalt = (skadR.cat==='DragonSalt' ? skadCat : 0) + (cgR.cat==='DragonSalt' ? cgCat : 0);
+    const needIchor      = (skadR.cat==='Ichor'      ? skadCat : 0) + (cgR.cat==='Ichor'      ? cgCat : 0);
+    const needSulfur     = cgR.cat==='Sulfur' ? cgCat : 0;
+
+    const tree = [
+      {name:'Skadite',      cls:'final',        amount:T,       prefix:''},
+      {divider:true},
+      {name:'Chalk Glance', cls:'intermediate', amount:needCG,  prefix:'├─ '},
+      {name:t('tree.itemPurchase',{item:skadR.cat==='DragonSalt'?'Dragon Salt':'Ichor'}), cls:'base-buy', amount:skadCat, prefix:'└─ ', tag:'buy', tagLabel:'purchase'},
+      {divider:true},
+
+      // ── Chalk Glance
+      {name:'▸ CHALK GLANCE', cls:'tree-section', amount:0, prefix:''},
+      {name:t('tree.xToY',{x:'Calspar',y:'Chalk Glance'}), cls:'intermediate', amount:needCals, prefix:'   └─ '},
+      ...(malBonus>0?[{name:t('tree.byproductParenFrom',{item:'Malachite',source:'Calspar'}), cls:'base-easy', amount:malBonus, prefix:'      ', tag:'easy', tagLabel:'bonus'}]:[]),
+      ...(electrumBonus>0?[{name:t('tree.byproductParenFrom',{item:'Electrum',source:'Calspar'}), cls:'base-easy', amount:electrumBonus, prefix:'      ', tag:'easy', tagLabel:'bonus'}]:[]),
+      {divider:true},
+
+      // ── Calspar
+      {name:'▸ CALSPAR', cls:'tree-section', amount:0, prefix:''},
+      {name:t('tree.xToY',{x:'Calx',y:'Calspar'}), cls:'intermediate', amount:needCalx_cals, prefix:'   └─ '},
+      ...(malFromCalsStep>0?[{name:t('tree.byproductParenFrom',{item:'Malachite',source:'Calspar'}), cls:'base-easy', amount:malFromCalsStep, prefix:'      ', tag:'easy', tagLabel:'bonus'}]:[]),
+      ...(calxPowderFromCals>0?[{name:t('tree.byproductParenFrom',{item:'Calx Powder',source:'Calspar'}), cls:'base-easy', amount:calxPowderFromCals, prefix:'      ', tag:'easy', tagLabel:'byproduct'}]:[]),
+      ...(coalFromCals>0?[{name:t('tree.byproductParenFrom',{item:'Coal',source:'Calspar'}), cls:'base-easy', amount:coalFromCals, prefix:'      ', tag:'easy', tagLabel:'byproduct'}]:[]),
+      {divider:true},
+
+      // ── Calx Powder / Coke (only when the Coke catalyst option is picked)
+      ...(totalCoke>0?[
+        {name:'▸ CALX POWDER / COKE', cls:'tree-section', amount:0, prefix:''},
+        {name:t('tree.itemTotalParen',{item:'Coke'}), cls:'intermediate', amount:totalCoke, prefix:'   ├─ '},
+        {name:t('tree.itemForTargetNoParen',{item:'Coal',target:'Coke'}), cls:'intermediate', amount:needCoal_coke, prefix:'   │  └─ '},
+        ...(needCalxForCP>0?[{name:t('tree.calxMix',{x:xCrusher.toFixed(1),y:yGrinder.toFixed(1)}), cls:'base-ore', amount:needCalxForCP, prefix:'   └─ ', tag:'mine', tagLabel:'ore'}]:[]),
+        {divider:true},
+      ]:[]),
+
+      // ── totals
+      {name:t('tree.totalBaseResources'), cls:'tree-section', amount:0, prefix:'', totals:true},
+      {divider:true},
+      {name:'Calx', cls:'base-ore', amount:needCalx_total, prefix:'', tag:'mine', tagLabel:'ore'},
+      ...(cpBonus>0?[{name:t('tree.bonusParen',{item:'Calx Powder'}), cls:'base-easy', amount:cpBonus, prefix:'', tag:'easy', tagLabel:'bonus'}]:[]),
+      ...(coalBonus>0?[{name:t('tree.bonusArrowExtra',{item:'Coal',source:'Calx'}), cls:'base-easy', amount:coalBonus, prefix:'', tag:'easy', tagLabel:'bonus'}]:[]),
+      ...(netCoal>0?[{name:t('tree.itemExtra',{item:'Coal'}), cls:'base-ore', amount:netCoal, prefix:'', tag:'mine', tagLabel:'byproduct'}]:[]),
+      ...(needBor>0?[{name:'Bor',              cls:'base-hard',amount:needBor,       prefix:'', tag:'hard', tagLabel:'hard'}]:[]),
+      ...(needDragonSalt>0?[{name:'Dragon Salt',cls:'base-buy',amount:needDragonSalt,prefix:'', tag:'buy',  tagLabel:'purchase'}]:[]),
+      ...(needIchor>0?[{name:'Ichor',          cls:'base-buy', amount:needIchor,     prefix:'', tag:'buy',  tagLabel:'purchase'}]:[]),
+      ...(needSulfur>0?[{name:'Sulfur',        cls:'base-buy', amount:needSulfur,    prefix:'', tag:'buy',  tagLabel:'purchase'}]:[]),
+      ...(needWater>0?[{name:'Water',          cls:'base-easy',amount:needWater,     prefix:'', tag:'easy', tagLabel:'easy'}]:[]),
+    ];
+
+    return { target:T, runs:T/3200, tree };
   }
 },
 ];

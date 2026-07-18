@@ -111,3 +111,19 @@ Still open: waste-minimization recipe hints (mixing two recipe options in propor
 - Playwright against `npm run dev` with cleared localStorage (fresh defaults): Messing/Bron/Tindremic render in RU and EN, Crusher+Saburra preselected, no Cyrillic leftovers in EN, no console/page errors. Screenshots in the session scratchpad (`sab-{ru,en}-*.png`).
 
 **Next concrete step:** remaining plan items — translate the leftover Russian code comments in `craftConstants.js` to English, add Skadite as a craftable target (needs its own runs metric, see PLAN.md design note), and a real in-repo automated test suite to replace the one-off node scripts.
+
+## 2026-07-18 — Skadite as a craftable target (+ EN ore-price panel bugfix)
+
+**What changed:**
+- Added **Skadite** as the 8th metal in `craftConstants.js`, per the PLAN.md design note. It is not a Refining Oven alloy — the final step is a plain Fabricula refine (`10 000 Chalk Glance + {190 Dragon Salt | 800 Ichor} → 3 200 Skadite`), so Ironmaster applies nowhere in the chain and `runs = target/3200`. Chain: Calx → Calspar → Chalk Glance → Skadite, where Chalk Glance (elsewhere a byproduct of Malachite recipes) is the driven output and Malachite/Electrum flip into bonus byproducts. All 12 Calspar→Chalk Glance catalyst options included; the Coke option gets the full Coal→Coke chain with the Crusher/Grinder Calx auto-mix, with the Calspar step's Calx Powder/Coal byproducts credited first.
+- The page-header subtitle was hardcoded "Refining Oven · yield 7 000 / craft" — now parameterized (`craft.furnaceSubtitle` takes `{furnace}/{n}`; metals may declare `furnace`/`craftYield`, defaulting to Refining Oven/7000).
+- **Bugfix:** `useCraftCalc.js`'s `oreList`/`costData` located the tree's totals section by matching the Russian header text (`'ИТОГО БАЗОВЫЕ'`) — broken in the EN locale ever since the tree-i18n migration (ore price panel rendered empty). Totals rows now carry `totals:true` and the composable keys off that flag.
+- `targets` gained the `skadite` key; a zero-amount Calx-mix row is now suppressed in Skadite's Coke section.
+
+**What was verified:**
+- Data cross-check: all 14 Skadite-chain options (2 skad + 12 cg) match `refineRecipes.js` on catalyst name/amount, building, and Chalk Glance/Malachite/Electrum outputs.
+- Sweep: 1 296 option×tool×target combinations — zero NaN/negative amounts; independent balance check at target 3200 (exactly 1 craft): Chalk Glance 10 000, Calx 558 036, Dragon Salt 4 190, Water 55 804, runs=1 — all match hand-derived values.
+- The three Saburra-metal verifiers re-run clean after the shared `totals:true` edit.
+- Playwright: Skadite renders in RU and EN (subtitle "Fabricula · выход/yield 3 200 / craft", "3.13 crafts" at target 10 000), no Cyrillic leftovers in EN, no console errors; EN ore-price panel now lists Calx/Dragon Salt/Water (regression fixed); Oghmium's subtitle still reads "Refining Oven · yield 7 000 / craft".
+
+**Next concrete step:** the last open plan item — an in-repo automated test suite to replace the one-off scratchpad node scripts.
