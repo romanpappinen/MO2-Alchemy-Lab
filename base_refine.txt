@@ -1,0 +1,632 @@
+10000 Grain Steel with 5000 Coal and 5000 Saburra Powder as catalysts in the refining oven yields: 7000 Steel
+10000 Pig Iron with 5000 Coke and 5000 Calx Powder as catalysts in the refining oven yields: 7000 Grain Steel
+10000 Grain Steel with 5000 Lupium and 5000 Granum Powder as catalysts in the refining oven yields: 7000 Tungsteel
+10000 Cuprum with 5000 Bleck and 5000 Saburra Powder as catalysts in the refining oven yields: 7000 Bron
+10000 Cuprum with 5000 Calamine and 5000 Saburra Powder as catalysts in the refining oven yields: 7000 Messing
+10000 Messing with 5000 Almine and 5000 Gem Metal as catalysts in the refining oven yields: 7000 Tindremic Messing
+10000 Grain Steel with 5000 Almine and 5000 Arconite as catalysts in the refining oven yields: 7000 Cronite
+10000 Tungsteel with 5000 Cronite and 5000 Sanguinite as catalysts in the refining oven yields: 7000 Oghmium
+
+To get Aabam use 10000 Red Bleckblende with Rock Oil (1000) in the Blast Furnace. This will yield:
+Aabam (3000), Calamine (240), Sanguinite (140), Silver (200)
+
+To get Aabam use 10000 Red Bleckblende with Fuming Salt (320) in the Blast Furnace. This will yield:
+Aabam (3000), Calamine (455), Sanguinite (200), Silver (350)
+
+To get Aabam use 10000 Red Bleckblende with Coke (438) in the Furnace. This will yield:
+Aabam (2322), Calamine (568), Sanguinite (23), Silver (158)
+
+To get Acronite use 10000 Pyroxene with Calx Powder (800) in the Blast Furnace. This will yield:
+Almine (400), Acronite (800), Calamine (2040), Electrum (2720)
+
+To get Acronite use 10000 Pyroxene with Calx Powder (800) in the Greater Natorus. This will yield:
+Almine (2000), Acronite (160), Calamine (3400), Electrum (2720)
+
+To get Almine use 10000 Pyroxene with Calx Powder (800) in the Blast Furnace. This will yield:
+Almine (400), Acronite (800), Calamine (2040), Electrum (2720)
+
+To get Almine use 10000 Pyroxene with Calx Powder (800) in the Greater Natorus. This will yield:
+Almine (2000), Acronite (160), Calamine (3400), Electrum (2720)
+
+To get Amarantum use 10000 Granum in the Crusher. This will yield:
+Amarantum (882), Blood Ore (770), Flakestone (140), Granum Powder (2940)
+
+To get Bleck use 10000 Amarantum in the Crusher. This will yield:
+Bleck (135), Calamine (90), Cuprum (270), Electrum (180), Waterstone (900)
+
+To get Bleck use 10000 Amarantum with Bor (720) in the Furnace. This will yield:
+Bleck (960), Calamine (563), Cuprum (2400), Electrum (480)
+
+To get Bleck use 10000 Amarantum with Bor (900) in the Blast Furnace. This will yield:
+Bleck (600), Calamine (624), Cuprum (3000), Electrum (800)
+
+To get Bleck use 10000 Bleckblende with Bor (900) in the Greater Natorus. This will yield:
+Bleck (6000)
+
+To get Bleck use 10000 Bleckblende with Bor (810) in the Natorus. This will yield:
+Bleck (5400)
+
+To get Bleck use 10000 Bleckblende with Rock Oil (417) in the Natorus. This will yield:
+Bleck (5400)
+
+To get Bleck use 10000 Bleckblende with Bor (720) in the Furnace. This will yield:
+Bleck (1920)
+
+To get Bleck use 10000 Saburra in the Crusher. This will yield:
+Bleckblende (1584), Jadeite (128), Malachite (1584), Pyrite (48), Saburra Powder (2000)
+
+To get Bleck use 10000 Saburra with Water (900) in the Grinder. This will yield:
+Bleckblende (1900), Jadeite (16), Malachite (950), Saburra Powder (4275)
+
+To get Bleck use 10000 Tephra with Bor (720) in the Grinder. This will yield:
+Cinnabar (90), Galbinum (1999), Magmum (259), Red Bleckblende (807), Volcanic Ash (2752)
+
+To get Bleck use 10000 Tephra with Water (1000) in the Grinder. This will yield:
+Cinnabar (88), Galbinum (1900), Magmum (259), Red Bleckblende (768), Volcanic Ash (2900)
+
+To get Bleck use 10000 Tephra with Calx Powder (800) in the Greater Natorus. This will yield:
+Cinnabar (72), Galbinum (499), Magmum (136), Red Bleckblende (2600), Volcanic Ash (296)
+
+To get Bleck use 10000 Tephra with Bor (900) in the Greater Natorus. This will yield:
+Cinnabar (115), Galbinum (1249), Magmum (72), Red Bleckblende (2132), Volcanic Ash (429)
+
+To get Bleck use 10000 Tephra with Calx Powder (800) in the Furnace. This will yield:
+Cinnabar (54), Galbinum (299), Magmum (259), Red Bleckblende (2080), Volcanic Ash (444)
+
+To get Bleckblende use 10000 Saburra in the Crusher. This will yield:
+Bleckblende (1584), Jadeite (128), Malachite (1584), Pyrite (48), Saburra Powder (2000)
+
+To get Bleckblende use 10000 Saburra with Water (900) in the Grinder. This will yield:
+Bleckblende (1900), Jadeite (16), Malachite (950), Saburra Powder (4275)
+
+To get Bleckblende use 10000 Tephra with Bor (720) in the Grinder. This will yield:
+Cinnabar (90), Galbinum (1999), Magmum (259), Red Bleckblende (807), Volcanic Ash (2752)
+
+To get Bleckblende use 10000 Tephra with Water (1000) in the Grinder. This will yield:
+Cinnabar (88), Galbinum (1900), Magmum (259), Red Bleckblende (768), Volcanic Ash (2900)
+
+To get Bleckblende use 10000 Tephra with Calx Powder (800) in the Greater Natorus. This will yield:
+Cinnabar (72), Galbinum (499), Magmum (136), Red Bleckblende (2600), Volcanic Ash (296)
+
+To get Bleckblende use 10000 Tephra with Bor (900) in the Greater Natorus. This will yield:
+Cinnabar (115), Galbinum (1249), Magmum (72), Red Bleckblende (2132), Volcanic Ash (429)
+
+To get Bleckblende use 10000 Tephra with Calx Powder (800) in the Furnace. This will yield:
+Cinnabar (54), Galbinum (299), Magmum (259), Red Bleckblende (2080), Volcanic Ash (444)
+
+To get Blood Ore use 10000 Gabore with Bor (630) in the Grinder. This will yield:
+Blood Ore (226), Gabore Powder (4186), Galbinum (1050)
+
+To get Blood Ore use 10000 Gabore with Coke (360) in the Furnace. This will yield:
+Blood Ore (568), Galbinum (236), Nyx (160)
+
+To get Blood Ore use 10000 Granum in the Crusher. This will yield:
+Amarantum (882), Blood Ore (770), Flakestone (140), Granum Powder (2940)
+
+To get Blood Ore use 10000 Granum with Calx Powder (720) in the Attractor. This will yield:
+Blood Ore (1980)
+
+To get Calamine use 10000 Amarantum in the Crusher. This will yield:
+Bleck (135), Calamine (90), Cuprum (270), Electrum (180), Waterstone (900)
+
+To get Calamine use 10000 Amarantum with Bor (720) in the Furnace. This will yield:
+Bleck (960), Calamine (563), Cuprum (2400), Electrum (480)
+
+To get Calamine use 10000 Amarantum with Bor (900) in the Blast Furnace. This will yield:
+Bleck (600), Calamine (624), Cuprum (3000), Electrum (800)
+
+To get Calamine use 10000 Pyroxene with Calx Powder (800) in the Blast Furnace. This will yield:
+Almine (400), Acronite (800), Calamine (2040), Electrum (2720)
+
+To get Calamine use 10000 Pyroxene with Calx Powder (800) in the Greater Natorus. This will yield:
+Almine (2000), Acronite (160), Calamine (3400), Electrum (2720)
+
+To get Calamine use 10000 Red Bleckblende with Rock Oil (1000) in the Blast Furnace. This will yield:
+Aabam (3000), Calamine (240), Sanguinite (140), Silver (200)
+
+To get Calamine use 10000 Red Bleckblende with Fuming Salt (320) in the Blast Furnace. This will yield:
+Aabam (3000), Calamine (455), Sanguinite (200), Silver (350)
+
+To get Calamine use 10000 Red Bleckblende with Coke (438) in the Furnace. This will yield:
+Aabam (2322), Calamine (568), Sanguinite (23), Silver (158)
+
+To get Calspar use 10000 Calx in the Crusher. This will yield:
+Calspar (360), Calx Powder (1361), Coal (2151), Flakestone (180), Malachite (891)
+
+To get Calspar use 10000 Calx with Water (1000) in the Grinder. This will yield:
+Calspar (2000), Calx Powder (2058), Coal (1140), Flakestone (36), Malachite (528)
+
+To get Calspar use 10000 Calx with Water (1000) in the Furnace. This will yield:
+Calspar (2560), Flakestone (28), Malachite (506)
+
+To get Calx Powder use 10000 Calx in the Crusher. This will yield:
+Calspar (360), Calx Powder (1361), Coal (2151), Flakestone (180), Malachite (891)
+
+To get Calx Powder use 10000 Calx with Water (1000) in the Grinder. This will yield:
+Calspar (2000), Calx Powder (2058), Coal (1140), Flakestone (36), Malachite (528)
+
+To get Chalk Glance use 10000 Calspar with Dragon Salt (280) in the Blast Furnace. This will yield:
+Chalk Glance (700), Electrum (224), Malachite (2064)
+
+To get Chalk Glance use 10000 Calspar with Ichor (1000) in the Blast Furnace. This will yield:
+Chalk Glance (490), Electrum (425), Malachite (3302)
+
+To get Chalk Glance use 10000 Calspar with Sulfur (490) in the Blast Furnace. This will yield:
+Chalk Glance (448), Electrum (291), Malachite (2373)
+
+To get Chalk Glance use 10000 Calspar with Dragon Salt (133) in the Furnace. This will yield:
+Chalk Glance (245), Electrum (88), Malachite (1444)
+
+To get Chalk Glance use 10000 Calspar with Ichor (700) in the Furnace. This will yield:
+Chalk Glance (159), Electrum (211), Malachite (2793)
+
+To get Chalk Glance use 10000 Calspar with Sulfur (490) in the Furnace. This will yield:
+Chalk Glance (142), Electrum (129), Malachite (1781)
+
+To get Chalk Glance use 10000 Calspar with Water (1000) in the Furnace. This will yield:
+Chalk Glance (72), Electrum (108), Malachite (3467)
+
+To get Chalk Glance use 10000 Calspar with Bor (630) in the Furnace. This will yield:
+Chalk Glance (73), Electrum (294), Malachite (4816)
+
+To get Chalk Glance use 10000 Calspar with Coke (341) in the Furnace. This will yield:
+Chalk Glance (73), Electrum (211), Malachite (3295)
+
+To get Chalk Glance use 10000 Calspar with Dragon Salt (190) in the Fabricula. This will yield:
+Chalk Glance (420)
+
+To get Chalk Glance use 10000 Calspar with Ichor (1000) in the Fabricula. This will yield:
+Chalk Glance (210), Electrum (336), Malachite (1375)
+
+To get Chalk Glance use 10000 Calspar with Sulfur (700) in the Fabricula. This will yield:
+Chalk Glance (167), Electrum (112), Malachite (334)
+
+To get Cinnabar use 10000 Tephra with Bor (720) in the Grinder. This will yield:
+Cinnabar (90), Galbinum (1999), Magmum (259), Red Bleckblende (807), Volcanic Ash (2752)
+
+To get Cinnabar use 10000 Tephra with Water (1000) in the Grinder. This will yield:
+Cinnabar (88), Galbinum (1900), Magmum (259), Red Bleckblende (768), Volcanic Ash (2900)
+
+To get Cinnabar use 10000 Tephra with Calx Powder (800) in the Greater Natorus. This will yield:
+Cinnabar (72), Galbinum (499), Magmum (136), Red Bleckblende (2600), Volcanic Ash (296)
+
+To get Cinnabar use 10000 Tephra with Bor (900) in the Greater Natorus. This will yield:
+Cinnabar (115), Galbinum (1249), Magmum (72), Red Bleckblende (2132), Volcanic Ash (429)
+
+To get Cinnabar use 10000 Tephra with Calx Powder (800) in the Furnace. This will yield:
+Cinnabar (54), Galbinum (299), Magmum (259), Red Bleckblende (2080), Volcanic Ash (444)
+
+To get Coal use 10000 Calx in the Crusher. This will yield:
+Calspar (360), Calx Powder (1361), Coal (2151), Flakestone (180), Malachite (891)
+
+To get Coal use 10000 Calx with Water (1000) in the Grinder. This will yield:
+Calspar (2000), Calx Powder (2058), Coal (1140), Flakestone (36), Malachite (528)
+
+To get Coke use 10000 Coal with Coal (600) in the Furnace. This will yield:
+Coke (7200)
+
+To get Coke use 10000 Coal with Calx Powder (720) in the Furnace. This will yield:
+Coke (7200)
+
+To get Cuprum use 10000 Amarantum in the Crusher. This will yield:
+Bleck (135), Calamine (90), Cuprum (270), Electrum (180), Waterstone (900)
+
+To get Cuprum use 10000 Amarantum with Bor (720) in the Furnace. This will yield:
+Bleck (960), Calamine (563), Cuprum (2400), Electrum (480)
+
+To get Cuprum use 10000 Amarantum with Bor (900) in the Blast Furnace. This will yield:
+Bleck (600), Calamine (624), Cuprum (3000), Electrum (800)
+
+To get Cuprum use 10000 Electrum with Calx Powder (800) in the Blast Furnace. This will yield:
+Cuprum (3500), Gold (1750), Silver (2500)
+
+To get Cuprum use 10000 Electrum with Calx Powder (640) in the Furnace. This will yield:
+Cuprum (2600), Gold (1400), Silver (1600)
+
+To get Cuprum use 10000 Malachite with Bor (900) in the Blast Furnace. This will yield:
+Cuprum (5000)
+
+To get Cuprum use 10000 Malachite with Bor (720) in the Fabricula. This will yield:
+Cuprum (4000), Sulfur (200)
+
+To get Cuprum use 10000 Malachite with Coke (385) in the Fabricula. This will yield:
+Cuprum (4000), Sulfur (320)
+
+To get Cuprum use 10000 Malachite with Coal (530) in the Fabricula. This will yield:
+Cuprum (2400), Sulfur (640)
+
+To get Cuprum use 10000 Malachite with Bor (720) in the Furnace. This will yield:
+Cuprum (4000), Sulfur (200)
+
+To get Cuprum use 10000 Malachite with Coke (400) in the Furnace. This will yield:
+Cuprum (4000), Sulfur (83)
+
+To get Cuprum use 10000 Malachite with Coke (385) in the Blast Furnace. This will yield:
+Cuprum (5000)
+
+To get Electrum use 10000 Amarantum in the Crusher. This will yield:
+Bleck (135), Calamine (90), Cuprum (270), Electrum (180), Waterstone (900)
+
+To get Electrum use 10000 Amarantum with Bor (720) in the Furnace. This will yield:
+Bleck (960), Calamine (563), Cuprum (2400), Electrum (480)
+
+To get Electrum use 10000 Amarantum with Bor (900) in the Blast Furnace. This will yield:
+Bleck (600), Calamine (624), Cuprum (3000), Electrum (800)
+
+To get Electrum use 10000 Calspar with Dragon Salt (280) in the Blast Furnace. This will yield:
+Chalk Glance (700), Electrum (224), Malachite (2064)
+
+To get Electrum use 10000 Calspar with Ichor (1000) in the Blast Furnace. This will yield:
+Chalk Glance (490), Electrum (425), Malachite (3302)
+
+To get Electrum use 10000 Calspar with Sulfur (490) in the Blast Furnace. This will yield:
+Chalk Glance (448), Electrum (291), Malachite (2373)
+
+To get Electrum use 10000 Calspar with Dragon Salt (133) in the Furnace. This will yield:
+Chalk Glance (245), Electrum (88), Malachite (1444)
+
+To get Electrum use 10000 Calspar with Ichor (700) in the Furnace. This will yield:
+Chalk Glance (159), Electrum (211), Malachite (2793)
+
+To get Electrum use 10000 Calspar with Sulfur (490) in the Furnace. This will yield:
+Chalk Glance (142), Electrum (129), Malachite (1781)
+
+To get Electrum use 10000 Calspar with Water (1000) in the Furnace. This will yield:
+Chalk Glance (72), Electrum (108), Malachite (3467)
+
+To get Electrum use 10000 Calspar with Bor (630) in the Furnace. This will yield:
+Chalk Glance (73), Electrum (294), Malachite (4816)
+
+To get Electrum use 10000 Calspar with Coke (341) in the Furnace. This will yield:
+Chalk Glance (73), Electrum (211), Malachite (3295)
+
+To get Electrum use 10000 Calspar with Ichor (1000) in the Fabricula. This will yield:
+Chalk Glance (210), Electrum (336), Malachite (1375)
+
+To get Electrum use 10000 Calspar with Sulfur (700) in the Fabricula. This will yield:
+Chalk Glance (167), Electrum (112), Malachite (334)
+
+To get Electrum use 10000 Calspar with Bor (900) in the Fabricula. This will yield:
+Electrum (560), Malachite (3440)
+
+To get Electrum use 10000 Pyroxene with Calx Powder (800) in the Blast Furnace. This will yield:
+Almine (400), Acronite (800), Calamine (2040), Electrum (2720)
+
+To get Electrum use 10000 Pyroxene with Calx Powder (800) in the Greater Natorus. This will yield:
+Almine (2000), Acronite (160), Calamine (3400), Electrum (2720)
+
+To get Flakestone use 10000 Calx in the Crusher. This will yield:
+Calspar (360), Calx Powder (1361), Coal (2151), Flakestone (180), Malachite (891)
+
+To get Flakestone use 10000 Calx with Water (1000) in the Grinder. This will yield:
+Calspar (2000), Calx Powder (2058), Coal (1140), Flakestone (36), Malachite (528)
+
+To get Flakestone use 10000 Calx with Water (1000) in the Furnace. This will yield:
+Calspar (2560), Flakestone (28), Malachite (506)
+
+To get Flakestone use 10000 Granum in the Crusher. This will yield:
+Amarantum (882), Blood Ore (770), Flakestone (140), Granum Powder (2940)
+
+To get Gabore Powder use 10000 Gabore with Bor (630) in the Grinder. This will yield:
+Blood Ore (226), Gabore Powder (4186), Galbinum (1050)
+
+To get Galbinum use 10000 Gabore with Bor (630) in the Grinder. This will yield:
+Blood Ore (226), Gabore Powder (4186), Galbinum (1050)
+
+To get Galbinum use 10000 Gabore with Coke (360) in the Furnace. This will yield:
+Blood Ore (568), Galbinum (236), Nyx (160)
+
+To get Galbinum use 10000 Tephra with Bor (720) in the Grinder. This will yield:
+Cinnabar (90), Galbinum (1999), Magmum (259), Red Bleckblende (807), Volcanic Ash (2752)
+
+To get Galbinum use 10000 Tephra with Water (1000) in the Grinder. This will yield:
+Cinnabar (88), Galbinum (1900), Magmum (259), Red Bleckblende (768), Volcanic Ash (2900)
+
+To get Galbinum use 10000 Tephra with Calx Powder (800) in the Greater Natorus. This will yield:
+Cinnabar (72), Galbinum (499), Magmum (136), Red Bleckblende (2600), Volcanic Ash (296)
+
+To get Galbinum use 10000 Tephra with Bor (900) in the Greater Natorus. This will yield:
+Cinnabar (115), Galbinum (1249), Magmum (72), Red Bleckblende (2132), Volcanic Ash (429)
+
+To get Galbinum use 10000 Tephra with Calx Powder (800) in the Furnace. This will yield:
+Cinnabar (54), Galbinum (299), Magmum (259), Red Bleckblende (2080), Volcanic Ash (444)
+
+To get Gem Metal use 10000 Waterstone with Rock Oil (800) in the Fabricula. This will yield:
+Gem Metal (3200)
+
+To get Gem Metal use 10000 Waterstone with Bor (720) in the Fabricula. This will yield:
+Gem Metal (1920), Lupium (959)
+
+To get Gem Metal use 10000 Waterstone with Fuming Salt (360) in the Fabricula. This will yield:
+Gem Metal (639), Lupium (2400)
+
+To get Gem Metal use 10000 Waterstone with Fuming Salt (360) in the Blast Furnace. This will yield:
+Gem Metal (1248), Lupium (3200)
+
+To get Gem Metal use 10000 Waterstone with Bor (720) in the Blast Furnace. This will yield:
+Gem Metal (1823), Lupium (2048)
+
+To get Gold use 10000 Electrum with Calx Powder (800) in the Blast Furnace. This will yield:
+Cuprum (3500), Gold (1750), Silver (2500)
+
+To get Gold use 10000 Electrum with Calx Powder (640) in the Furnace. This will yield:
+Cuprum (2600), Gold (1400), Silver (1600)
+
+To get Granum Powder use 10000 Granum in the Crusher. This will yield:
+Amarantum (882), Blood Ore (770), Flakestone (140), Granum Powder (2940)
+
+To get Jadeite use 10000 Saburra in the Crusher. This will yield:
+Bleckblende (1584), Jadeite (128), Malachite (1584), Pyrite (48), Saburra Powder (2000)
+
+To get Jadeite use 10000 Saburra with Water (900) in the Grinder. This will yield:
+Bleckblende (1900), Jadeite (16), Malachite (950), Saburra Powder (4275)
+
+To get Kyanite use 10000 Magmum with Bor (900) in the Grizzly. This will yield:
+Kyanite (2250), Maalite (585), Pyropite (200)
+
+To get Kyanite use 10000 Magmum with Coke (487) in the Grizzly. This will yield:
+Kyanite (2250), Maalite (630), Pyropite (182)
+
+To get Lupium use 10000 Galbinum with Calx Powder (640) in the Blast Furnace. This will yield:
+Lupium (298), Pyroxene (1230)
+
+To get Lupium use 10000 Galbinum with Coke (390) in the Blast Furnace. This will yield:
+Lupium (245), Pyroxene (1760)
+
+To get Lupium use 10000 Galbinum with Bor (720) in the Blast Furnace. This will yield:
+Lupium (245), Pyroxene (1400)
+
+To get Lupium use 10000 Galbinum with Calx Powder (480) in the Furnace. This will yield:
+Lupium (170), Pyrite (55), Pyroxene (696)
+
+To get Lupium use 10000 Galbinum with Coke (390) in the Greater Natorus. This will yield:
+Lupium (62), Pyrite (652), Pyroxene (4200)
+
+To get Lupium use 10000 Waterstone with Bor (720) in the Fabricula. This will yield:
+Gem Metal (1920), Lupium (959)
+
+To get Lupium use 10000 Waterstone with Fuming Salt (360) in the Fabricula. This will yield:
+Gem Metal (639), Lupium (2400)
+
+To get Lupium use 10000 Waterstone with Fuming Salt (360) in the Blast Furnace. This will yield:
+Gem Metal (1248), Lupium (3200)
+
+To get Lupium use 10000 Waterstone with Bor (720) in the Blast Furnace. This will yield:
+Gem Metal (1823), Lupium (2048)
+
+To get Maalite use 10000 Magmum with Bor (900) in the Grizzly. This will yield:
+Kyanite (2250), Maalite (585), Pyropite (200)
+
+To get Maalite use 10000 Magmum with Coke (487) in the Grizzly. This will yield:
+Kyanite (2250), Maalite (630), Pyropite (182)
+
+To get Maalite use 10000 Magmum with Bor (720) in the Kiln. This will yield:
+Maalite (2080), Pyropite (480)
+
+To get Maalite use 10000 Magmum with Coke (390) in the Kiln. This will yield:
+Maalite (4264), Pyropite (220)
+
+To get Maalite use 10000 Magmum with Bor (540) in the Hearth. This will yield:
+Maalite (720), Pyropite (600)
+
+To get Magmum use 10000 Tephra with Bor (720) in the Grinder. This will yield:
+Cinnabar (90), Galbinum (1999), Magmum (259), Red Bleckblende (807), Volcanic Ash (2752)
+
+To get Magmum use 10000 Tephra with Water (1000) in the Grinder. This will yield:
+Cinnabar (88), Galbinum (1900), Magmum (259), Red Bleckblende (768), Volcanic Ash (2900)
+
+To get Magmum use 10000 Tephra with Calx Powder (800) in the Greater Natorus. This will yield:
+Cinnabar (72), Galbinum (499), Magmum (136), Red Bleckblende (2600), Volcanic Ash (296)
+
+To get Magmum use 10000 Tephra with Bor (900) in the Greater Natorus. This will yield:
+Cinnabar (115), Galbinum (1249), Magmum (72), Red Bleckblende (2132), Volcanic Ash (429)
+
+To get Magmum use 10000 Tephra with Calx Powder (800) in the Furnace. This will yield:
+Cinnabar (54), Galbinum (299), Magmum (259), Red Bleckblende (2080), Volcanic Ash (444)
+
+To get Malachite use 10000 Calspar with Dragon Salt (280) in the Blast Furnace. This will yield:
+Chalk Glance (700), Electrum (224), Malachite (2064)
+
+To get Malachite use 10000 Calspar with Ichor (1000) in the Blast Furnace. This will yield:
+Chalk Glance (490), Electrum (425), Malachite (3302)
+
+To get Malachite use 10000 Calspar with Sulfur (490) in the Blast Furnace. This will yield:
+Chalk Glance (448), Electrum (291), Malachite (2373)
+
+To get Malachite use 10000 Calspar with Dragon Salt (133) in the Furnace. This will yield:
+Chalk Glance (245), Electrum (88), Malachite (1444)
+
+To get Malachite use 10000 Calspar with Ichor (700) in the Furnace. This will yield:
+Chalk Glance (159), Electrum (211), Malachite (2793)
+
+To get Malachite use 10000 Calspar with Sulfur (490) in the Furnace. This will yield:
+Chalk Glance (142), Electrum (129), Malachite (1781)
+
+To get Malachite use 10000 Calspar with Water (1000) in the Furnace. This will yield:
+Chalk Glance (72), Electrum (108), Malachite (3467)
+
+To get Malachite use 10000 Calspar with Bor (630) in the Furnace. This will yield:
+Chalk Glance (73), Electrum (294), Malachite (4816)
+
+To get Malachite use 10000 Calspar with Coke (341) in the Furnace. This will yield:
+Chalk Glance (73), Electrum (211), Malachite (3295)
+
+To get Malachite use 10000 Calspar with Ichor (1000) in the Fabricula. This will yield:
+Chalk Glance (210), Electrum (336), Malachite (1375)
+
+To get Malachite use 10000 Calspar with Sulfur (700) in the Fabricula. This will yield:
+Chalk Glance (167), Electrum (112), Malachite (334)
+
+To get Malachite use 10000 Calspar with Bor (900) in the Fabricula. This will yield:
+Electrum (560), Malachite (3440)
+
+To get Malachite use 10000 Calx in the Crusher. This will yield:
+Calspar (360), Calx Powder (1361), Coal (2151), Flakestone (180), Malachite (891)
+
+To get Malachite use 10000 Calx with Water (1000) in the Grinder. This will yield:
+Calspar (2000), Calx Powder (2058), Coal (1140), Flakestone (36), Malachite (528)
+
+To get Malachite use 10000 Calx with Water (1000) in the Furnace. This will yield:
+Calspar (2560), Flakestone (28), Malachite (506)
+
+To get Malachite use 10000 Cerulite in the Crusher. This will yield:
+Azurite (2200), Malachite (5760), Pyrite (80), Saburra Powder (500)
+
+To get Malachite use 10000 Saburra in the Crusher. This will yield:
+Bleckblende (1584), Jadeite (128), Malachite (1584), Pyrite (48), Saburra Powder (2000)
+
+To get Malachite use 10000 Saburra with Water (900) in the Grinder. This will yield:
+Bleckblende (1900), Jadeite (16), Malachite (950), Saburra Powder (4275)
+
+To get Nyx use 10000 Gabore with Coke (360) in the Furnace. This will yield:
+Blood Ore (568), Galbinum (236), Nyx (160)
+
+To get Pig Iron use 10000 Blood Ore with Coke (400) in the Furnace. This will yield:
+Pig Iron (4000)
+
+To get Pig Iron use 10000 Blood Ore with Coke (390) in the Blast Furnace. This will yield:
+Pig Iron (5000)
+
+To get Pig Iron use 10000 Blood Ore with Sulfur (580) in the Furnace. This will yield:
+Pig Iron (4000)
+
+To get Pyrite use 10000 Cerulite in the Crusher. This will yield:
+Azurite (2200), Malachite (5760), Pyrite (80), Saburra Powder (500)
+
+To get Pyrite use 10000 Galbinum with Calx Powder (480) in the Furnace. This will yield:
+Lupium (170), Pyrite (55), Pyroxene (696)
+
+To get Pyrite use 10000 Galbinum with Coke (390) in the Greater Natorus. This will yield:
+Lupium (62), Pyrite (652), Pyroxene (4200)
+
+To get Pyrite use 10000 Saburra in the Crusher. This will yield:
+Bleckblende (1584), Jadeite (128), Malachite (1584), Pyrite (48), Saburra Powder (2000)
+
+To get Pyrite use 10000 Saburra with Coal (397) in the Attractor. This will yield:
+Pyrite (180)
+
+To get Pyropite use 10000 Magmum with Bor (900) in the Grizzly. This will yield:
+Kyanite (2250), Maalite (585), Pyropite (200)
+
+To get Pyropite use 10000 Magmum with Coke (487) in the Grizzly. This will yield:
+Kyanite (2250), Maalite (630), Pyropite (182)
+
+To get Pyropite use 10000 Magmum with Bor (720) in the Kiln. This will yield:
+Maalite (2080), Pyropite (480)
+
+To get Pyropite use 10000 Magmum with Coke (390) in the Kiln. This will yield:
+Maalite (4264), Pyropite (220)
+
+To get Pyropite use 10000 Magmum with Bor (540) in the Hearth. This will yield:
+Maalite (720), Pyropite (600)
+
+To get Pyroxene use 10000 Galbinum with Calx Powder (640) in the Blast Furnace. This will yield:
+Lupium (298), Pyroxene (1230)
+
+To get Pyroxene use 10000 Galbinum with Coke (390) in the Blast Furnace. This will yield:
+Lupium (245), Pyroxene (1760)
+
+To get Pyroxene use 10000 Galbinum with Bor (720) in the Blast Furnace. This will yield:
+Lupium (245), Pyroxene (1400)
+
+To get Pyroxene use 10000 Galbinum with Calx Powder (480) in the Furnace. This will yield:
+Lupium (170), Pyrite (55), Pyroxene (696)
+
+To get Pyroxene use 10000 Galbinum with Coke (390) in the Greater Natorus. This will yield:
+Lupium (62), Pyrite (652), Pyroxene (4200)
+
+To get Red Bleckblende use 10000 Tephra with Bor (720) in the Grinder. This will yield:
+Cinnabar (90), Galbinum (1999), Magmum (259), Red Bleckblende (807), Volcanic Ash (2752)
+
+To get Red Bleckblende use 10000 Tephra with Water (1000) in the Grinder. This will yield:
+Cinnabar (88), Galbinum (1900), Magmum (259), Red Bleckblende (768), Volcanic Ash (2900)
+
+To get Red Bleckblende use 10000 Tephra with Calx Powder (800) in the Greater Natorus. This will yield:
+Cinnabar (72), Galbinum (499), Magmum (136), Red Bleckblende (2600), Volcanic Ash (296)
+
+To get Red Bleckblende use 10000 Tephra with Bor (900) in the Greater Natorus. This will yield:
+Cinnabar (115), Galbinum (1249), Magmum (72), Red Bleckblende (2132), Volcanic Ash (429)
+
+To get Red Bleckblende use 10000 Tephra with Calx Powder (800) in the Furnace. This will yield:
+Cinnabar (54), Galbinum (299), Magmum (259), Red Bleckblende (2080), Volcanic Ash (444)
+
+To get Saburra Powder use 10000 Cerulite in the Crusher. This will yield:
+Azurite (2200), Malachite (5760), Pyrite (80), Saburra Powder (500)
+
+To get Saburra Powder use 10000 Saburra in the Crusher. This will yield:
+Bleckblende (1584), Jadeite (128), Malachite (1584), Pyrite (48), Saburra Powder (2000)
+
+To get Saburra Powder use 10000 Saburra with Water (900) in the Grinder. This will yield:
+Bleckblende (1900), Jadeite (16), Malachite (950), Saburra Powder (4275)
+
+To get Sanguinite use 10000 Red Bleckblende with Rock Oil (1000) in the Blast Furnace. This will yield:
+Aabam (3000), Calamine (240), Sanguinite (140), Silver (200)
+
+To get Sanguinite use 10000 Red Bleckblende with Fuming Salt (320) in the Blast Furnace. This will yield:
+Aabam (3000), Calamine (455), Sanguinite (200), Silver (350)
+
+To get Sanguinite use 10000 Red Bleckblende with Coke (438) in the Furnace. This will yield:
+Aabam (2322), Calamine (568), Sanguinite (23), Silver (158)
+
+To get Silver use 10000 Electrum with Calx Powder (800) in the Blast Furnace. This will yield:
+Cuprum (3500), Gold (1750), Silver (2500)
+
+To get Silver use 10000 Electrum with Calx Powder (640) in the Furnace. This will yield:
+Cuprum (2600), Gold (1400), Silver (1600)
+
+To get Silver use 10000 Red Bleckblende with Rock Oil (1000) in the Blast Furnace. This will yield:
+Aabam (3000), Calamine (240), Sanguinite (140), Silver (200)
+
+To get Silver use 10000 Red Bleckblende with Fuming Salt (320) in the Blast Furnace. This will yield:
+Aabam (3000), Calamine (455), Sanguinite (200), Silver (350)
+
+To get Silver use 10000 Red Bleckblende with Coke (438) in the Furnace. This will yield:
+Aabam (2322), Calamine (568), Sanguinite (23), Silver (158)
+
+To get Skadite use 10000 Chalk Glance with Dragon Salt (190) in the Fabricula. This will yield:
+Skadite (3200)
+
+To get Skadite use 10000 Chalk Glance with Ichor (800) in the Fabricula. This will yield:
+Skadite (3200)
+
+To get Sulfur use 10000 Cinnibar with Bor (360) in the Furnace. This will yield:
+Ichor (3900), Sulfur (800)
+
+To get Sulfur use 10000 Cinnibar with Bor (540) in the Greater Natorus. This will yield:
+Sulfur (2400)
+
+To get Sulfur use 10000 Cinnibar with Bor (360) in the Fabricula. This will yield:
+Ichor (960), Sulfur (1600)
+
+To get Sulfur use 10000 Malachite with Bor (720) in the Fabricula. This will yield:
+Cuprum (4000), Sulfur (200)
+
+To get Sulfur use 10000 Malachite with Coke (385) in the Fabricula. This will yield:
+Cuprum (4000), Sulfur (320)
+
+To get Sulfur use 10000 Malachite with Coal (530) in the Fabricula. This will yield:
+Cuprum (2400), Sulfur (640)
+
+To get Sulfur use 10000 Malachite with Bor (720) in the Furnace. This will yield:
+Cuprum (4000), Sulfur (200)
+
+To get Sulfur use 10000 Malachite with Coke (400) in the Furnace. This will yield:
+Cuprum (4000), Sulfur (83)
+
+To get Volcanic Ash use 10000 Tephra with Bor (720) in the Grinder. This will yield:
+Cinnabar (90), Galbinum (1999), Magmum (259), Red Bleckblende (807), Volcanic Ash (2752)
+
+To get Volcanic Ash use 10000 Tephra with Water (1000) in the Grinder. This will yield:
+Cinnabar (88), Galbinum (1900), Magmum (259), Red Bleckblende (768), Volcanic Ash (2900)
+
+To get Volcanic Ash use 10000 Tephra with Calx Powder (800) in the Greater Natorus. This will yield:
+Cinnabar (72), Galbinum (499), Magmum (136), Red Bleckblende (2600), Volcanic Ash (296)
+
+To get Volcanic Ash use 10000 Tephra with Bor (900) in the Greater Natorus. This will yield:
+Cinnabar (115), Galbinum (1249), Magmum (72), Red Bleckblende (2132), Volcanic Ash (429)
+
+To get Volcanic Ash use 10000 Tephra with Calx Powder (800) in the Furnace. This will yield:
+Cinnabar (54), Galbinum (299), Magmum (259), Red Bleckblende (2080), Volcanic Ash (444)
+
+To get Waterstone use 10000 Amarantum in the Crusher. This will yield:
+Bleck (135), Calamine (90), Cuprum (270), Electrum (180), Waterstone (900)
