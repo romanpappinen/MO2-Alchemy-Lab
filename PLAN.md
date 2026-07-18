@@ -22,6 +22,7 @@ Russian anywhere else.
 - [x] Remove dead code (mechanical `no-unused-vars` sweep) — surfaced two real bugs along the way: Messing/Bron silently dropped Coke/Coal requirements, Tindremic dropped Almine's mandatory Calx Powder catalyst. Fixed by adding a proper Coal->Coke chain + Crusher/Grinder Calx auto-mix to all three metals.
 
 - [x] Translate all material-tree labels through `useI18n.js` (RU/EN) — `calc()` now takes a `t` function; ~40 shared `tree.*`/`tag.*` template keys cover all 7 metals' rows in both locales
+- [x] Saburra as a first-class Cuprum path (Messing, Bron, Tindremic Messing): one Saburra batch yields Malachite AND Saburra Powder at once, so the SP-step and Malachite-step now share a 2x2 joint solver (same pattern as the Crusher/Grinder Calx mix) instead of double-counting or ignoring each other's byproducts. Defaults switched from the Calspar path to Crusher+Saburra. Tindremic gained the Saburra options it was missing entirely (and now credits the SP-step Malachite byproduct on the Calspar path too). Bron additionally credits the Bleckblende that crushed Saburra yields toward the Bleck chain — on defaults it fully covers Bleckblende mining. Also fixed Bron's water double-count (mal-step Water catalyst was added twice; same bug fixed earlier in Messing).
 
 ## In progress
 

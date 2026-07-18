@@ -839,7 +839,7 @@ export const METALS = [
 },
 {
   id:'tindremic', name:'Tindremic Messing',
-  defaultSel:{gem:0,al:1,cup:0,mal:0,cals:2,sab:1,coke:1,calx:1},
+  defaultSel:{gem:0,al:1,cup:0,mal:3,cals:2,sab:1,coke:1,calx:1},
   steps:[
     {id:'gem',label:'Gem Metal',options:[
       {label:'Fabricula + Rock Oil ★',     furnace:'Fabricula',    input:'10 000 Waterstone + 800 Rock Oil',   yield:3200,cat:'Rock Oil',   catAmt:800},
@@ -857,9 +857,13 @@ export const METALS = [
       {label:'Furnace + Malachite + Bor',        furnace:'Furnace',      input:'10 000 Malachite + 720 Bor', yield:4000,cat:'Bor', catAmt:720},
     ]},
     {id:'mal',label:'Malachite',options:[
-      {label:'Furnace + Calspar + Bor ★',      furnace:'Furnace',      input:'10 000 Calspar + 630 Bor',    yield:4816,cat:'Bor',  catAmt:630},
-      {label:'Furnace + Calspar + Water',       furnace:'Furnace',      input:'10 000 Calspar + 1 000 Water',yield:3467,cat:'Water',catAmt:1000},
-      {label:'Blast Furnace + Calspar + Ichor', furnace:'Blast Furnace',input:'10 000 Calspar + 1 000 Ichor',yield:3302,cat:'Ichor',catAmt:1000},
+      // Calspar-based
+      {label:'Furnace + Calspar + Bor ★',      furnace:'Furnace',      input:'10 000 Calspar + 630 Bor',    yield:4816,cat:'Bor',  catAmt:630, base:'Calspar'},
+      {label:'Furnace + Calspar + Water',       furnace:'Furnace',      input:'10 000 Calspar + 1 000 Water',yield:3467,cat:'Water',catAmt:1000,base:'Calspar'},
+      {label:'Blast Furnace + Calspar + Ichor', furnace:'Blast Furnace',input:'10 000 Calspar + 1 000 Ichor',yield:3302,cat:'Ichor',catAmt:1000,base:'Calspar'},
+      // Saburra-based (yields both Saburra Powder and Malachite)
+      {label:'Crusher + Saburra (gives SP+Mal)',furnace:'Crusher',      input:'10 000 Saburra',              yield:1584,cat:null,   catAmt:0,   base:'Saburra', saburraP:2000},
+      {label:'Grinder + Saburra + Water',       furnace:'Grinder',      input:'10 000 Saburra + 900 Water',  yield:950, cat:'Water',catAmt:900, base:'Saburra', saburraP:4275},
     ]},
     {id:'cals',label:'Calspar',options:[
       {label:'Crusher + Calx',          furnace:'Crusher',input:'10 000 Calx',              yield:360, cat:null,   catAmt:0},
@@ -867,8 +871,8 @@ export const METALS = [
       {label:'Furnace + Calx + Water ★',furnace:'Furnace',input:'10 000 Calx + 1 000 Water',yield:2560,cat:'Water',catAmt:1000},
     ]},
     {id:'sab',label:'Saburra Powder',options:[
-      {label:'Crusher + Saburra',          furnace:'Crusher',input:'10 000 Saburra',            yield:2000,cat:null,   catAmt:0},
-      {label:'Grinder + Saburra + Water ★',furnace:'Grinder',input:'10 000 Saburra + 900 Water',yield:4275,cat:'Water',catAmt:900},
+      {label:'Crusher + Saburra',          furnace:'Crusher',input:'10 000 Saburra',            yield:2000,cat:null,   catAmt:0,  mal:1584},
+      {label:'Grinder + Saburra + Water ★',furnace:'Grinder',input:'10 000 Saburra + 900 Water',yield:4275,cat:'Water',catAmt:900,mal:950},
     ]},
     {id:'coke', label:'Coke', options:[
       {label:'Furnace + Coal + Coal',           furnace:'Furnace', input:'10 000 Coal + 600 Coal',        yield:7200, coalTotal:10600, useCalxPowder:false},
@@ -909,12 +913,54 @@ export const METALS = [
     const needSP  = r(needMess,RO,5000);
     const needMal  = r(needCup,cupR.yield*EM,10000);
     const cupCat   = r(needCup,cupR.yield*EM,cupR.catAmt);
-    const needCals = r(needMal,malR.yield*EM,10000);
-    const malCat   = r(needMal,malR.yield*EM,malR.catAmt);
+
+    // ── MALACHITE: from Saburra (jointly with SP — 2x2 solver), or from Calspar ──
+    const malYield = malR.yield*EM;
+    const sabYield = sR.yield*EM;
+    let needMal_craft = 0, needCals = 0;
+    let malFromSab = 0, sabPFromMal = 0;
+    let needSaburra_mal = 0, needSaburra_sp = 0, sabWater = 0;
+    let sabPBonus = 0, malSabBonus = 0;
+
+    if (malR.base === 'Saburra') {
+      // Both flows (SP-step and Malachite-step) crush the same Saburra and yield
+      // both products at once — solve a 2x2 system to cover both Saburra Powder
+      // and Malachite with minimal surplus.
+      const spS = sabYield,              malS = (sR.mal||0)*EM;
+      const spM = (malR.saburraP||0)*EM, malM = malYield;
+      const det = spS*malM - spM*malS;
+      let S = 0, M = 0;
+      if (Math.abs(det) < 1e-9) {
+        // same recipe picked in both steps — one flow covers both products
+        S = Math.max(needSP/spS, malS > 0 ? needMal/malS : 0);
+      } else {
+        S = (needSP*malM - needMal*spM) / det;
+        M = (spS*needMal - malS*needSP) / det;
+        if (S < 0) { S = 0; M = Math.max(spM > 0 ? needSP/spM : 0, needMal/malM); }
+        if (M < 0) { M = 0; S = Math.max(needSP/spS, malS > 0 ? needMal/malS : 0); }
+      }
+      needSaburra_sp  = S * 10000;
+      needSaburra_mal = M * 10000;
+      sabWater = S * sR.catAmt;
+      malFromSab   = S * malS;
+      sabPFromMal  = M * spM;
+      needMal_craft = M * malM;
+      const spProduced  = S*spS + M*spM;
+      const malProduced = S*malS + M*malM;
+      sabPBonus   = Math.max(0, spProduced - needSP);
+      malSabBonus = Math.max(0, malProduced - needMal);
+    } else {
+      // Calspar path; the SP-step still yields Malachite as a byproduct
+      malFromSab = sR.mal ? r(needSP, sabYield, sR.mal) : 0;
+      needMal_craft = Math.max(0, needMal - malFromSab);
+      needCals = r(needMal_craft, malYield, 10000);
+      needSaburra_sp = r(needSP, sabYield, 10000);
+      sabWater = r(needSP, sabYield, sR.catAmt);
+    }
+    const malCat   = needMal_craft > 0 ? r(needMal_craft,malYield,malR.catAmt) : 0;
     const needCalx = r(needCals,cR.yield*EM,10000);
     const calsWater= r(needCals,cR.yield*EM,cR.catAmt);
-    const needSaburra=r(needSP,sR.yield*EM,10000);
-    const sabWater   =r(needSP,sR.yield*EM,sR.catAmt);
+    const needSaburra = needSaburra_sp + needSaburra_mal;
 
     // Granum → Amarantum → Waterstone (EM applies)
     const needAmarantum = r(needWS,900*EM,10000);
@@ -924,9 +970,9 @@ export const METALS = [
     const needBorGem=(sel.gem===1||sel.gem===2)?gemCat:0;
     const needFS   = sel.gem===3?gemCat:0;
     const needBorCup=(sel.cup===0||sel.cup===2)?cupCat:0;
-    const needBorMal=sel.mal===0?malCat:0;
+    const needBorMal=malR.cat==='Bor'?malCat:0;
     const needBor  = needBorGem+needBorCup+needBorMal;
-    const needIchor= sel.mal===2?malCat:0;
+    const needIchor= malR.cat==='Ichor'?malCat:0;
 
     // ── COKE / COAL: Cuprum может требовать Coke (крафтится из Coal) ──
     const cupCoke = sel.cup===1?cupCat:0;
@@ -964,7 +1010,8 @@ export const METALS = [
     const cpBonus    = Math.max(0, cpFromCalx - cpDeficit);
     const needCalxGrandTotal = needCalx + needCalxForCP;
 
-    const needWater= calsWater+sabWater+calxWaterForCP+(sel.mal===1?malCat:0);
+    // (when the mal catalyst is Water it is already counted once via malCat)
+    const needWater= calsWater+sabWater+calxWaterForCP+(malR.cat==='Water'?malCat:0);
 
     const tree=[
       {name:'Tindremic Messing',cls:'final',      amount:T,        prefix:''},
@@ -980,12 +1027,18 @@ export const METALS = [
       {name:'Waterstone',    cls:'intermediate',amount:needWS,      prefix:'   └─ '},
       {divider:true},
       {name:'Malachite',     cls:'intermediate',amount:needMal,     prefix:'      └─ '},
+      ...(malFromSab>0?[{name:t('tree.byproductArrowFromSourceN',{source:'Saburra Powder',n:Math.round(malFromSab).toLocaleString('ru')}), cls:'base-easy', amount:malFromSab, prefix:'      ', tag:'easy', tagLabel:'byproduct'}]:[]),
+      ...(sabPFromMal>0?[{name:t('tree.byproductParenFrom',{item:'Saburra Powder',source:'Saburra'}), cls:'base-easy', amount:sabPFromMal, prefix:'      ', tag:'easy', tagLabel:'byproduct'}]:[]),
+      ...(sabPBonus>0?[{name:t('tree.bonusParen',{item:'Saburra Powder'}), cls:'base-easy', amount:sabPBonus, prefix:'      ', tag:'easy', tagLabel:'bonus'}]:[]),
+      ...(malSabBonus>0?[{name:t('tree.bonusParen',{item:'Malachite'}), cls:'base-easy', amount:malSabBonus, prefix:'      ', tag:'easy', tagLabel:'bonus'}]:[]),
       {name:'Saburra',       cls:'base-ore',    amount:needSaburra, prefix:'      └─ ',tag:'mine',tagLabel:'ore'},
       {name:'Granum (→Amarantum→WS)',cls:'base-ore',amount:granumForWS,prefix:'      └─ ',tag:'mine',tagLabel:'ore'},
       {divider:true},
-      {name:'Calspar',       cls:'intermediate',amount:needCals,    prefix:'         └─ '},
-      {divider:true},
-      {name:'Calx (→ Calspar)',cls:'base-ore',amount:needCalx,prefix:'            ',tag:'mine',tagLabel:'ore'},
+      ...(malR.base==='Calspar'?[
+        {name:'Calspar',       cls:'intermediate',amount:needCals,    prefix:'         └─ '},
+        {divider:true},
+        {name:'Calx (→ Calspar)',cls:'base-ore',amount:needCalx,prefix:'            ',tag:'mine',tagLabel:'ore'},
+      ]:[]),
       ...(needRO>0?[{name:'Rock Oil',   cls:'base-buy', amount:needRO,   prefix:'            ',tag:'buy', tagLabel:'purchase'}]:[]),
       ...(needFS>0?[{name:'Fuming Salt',cls:'base-buy', amount:needFS,   prefix:'            ',tag:'buy', tagLabel:'purchase'}]:[]),
       ...(needBor>0?[{name:'Bor',       cls:'base-hard',amount:needBor,  prefix:'            ',tag:'hard',tagLabel:'hard'}]:[]),
@@ -1255,7 +1308,7 @@ export const METALS = [
 },
 {
   id:'bron', name:'Bron',
-  defaultSel:{cup:5, mal:7, cals:0, bleck:0, sab:1, coke:1, calx:1},
+  defaultSel:{cup:5, mal:14, cals:0, bleck:0, sab:1, coke:1, calx:1},
   steps:[
     {id:'cup', label:'Cuprum', options:[
       // Amarantum-based
@@ -1307,8 +1360,8 @@ export const METALS = [
       {label:'Furnace + Bleckblende + Bor',            furnace:'Furnace',        input:'10 000 Bleckblende + 720 Bor',      yield:1920, cat:'Bor',      catAmt:720, base:'Bleckblende'},
     ]},
     {id:'sab', label:'Saburra Powder', options:[
-      {label:'Crusher + Saburra',           furnace:'Crusher',input:'10 000 Saburra',             yield:2000, cat:null,    catAmt:0,   mal:1584},
-      {label:'Grinder + Saburra + Water ★', furnace:'Grinder',input:'10 000 Saburra + 900 Water', yield:4275, cat:'Water', catAmt:900, mal:950,},
+      {label:'Crusher + Saburra',           furnace:'Crusher',input:'10 000 Saburra',             yield:2000, cat:null,    catAmt:0,   mal:1584, bleckblende:1584},
+      {label:'Grinder + Saburra + Water ★', furnace:'Grinder',input:'10 000 Saburra + 900 Water', yield:4275, cat:'Water', catAmt:900, mal:950,  bleckblende:1900},
     ]},
     {id:'coke', label:'Coke', options:[
       {label:'Furnace + Coal + Coal',           furnace:'Furnace', input:'10 000 Coal + 600 Coal',        yield:7200, coalTotal:10600, useCalxPowder:false},
@@ -1340,7 +1393,6 @@ export const METALS = [
 
     // ── SABURRA POWDER ──
     const sabYield    = sabR.yield * EM;
-    const malFromSab  = sabR.mal ? r(needSP, sabYield, sabR.mal) : 0;
 
     // ── CUPRUM ──
     const cupYield = cupR.yield * EM;
@@ -1357,24 +1409,56 @@ export const METALS = [
     if (cupR.base === 'Amarantum') needAmarantum_forCup = needCupBase;
     const needGranum_cup = needAmarantum_forCup > 0 ? r(needAmarantum_forCup, 882*EM, 10000) : 0;
 
-    // ── MALACHITE (для Cuprum, если нужен) ──
+    // ── MALACHITE: from Saburra (jointly with SP — 2x2 solver), or from Calspar/Calx ──
     const malYield = malR.yield * EM;
-    const malPool_pre = malFromSab;
     let needMal_craft = 0, needCals_forMal = 0, calsYield = 0;
+    let malFromSab = 0, sabPFromMal = 0;
+    let needSaburra_mal = 0, needSaburra_sp = 0, sabWater_sp = 0;
+    let sabPBonus = 0, malSabBonus = 0, bleckFromSaburra = 0;
 
-    if (malR.base === 'Calspar') {
-      needMal_craft = Math.max(0, needMal_forCup - malPool_pre);
-      needCals_forMal = r(needMal_craft, malYield, 10000);
-    } else if (malR.base === 'Calx') {
-      needMal_craft = Math.max(0, needMal_forCup - malPool_pre);
-    } else if (malR.base === 'Saburra') {
-      needMal_craft = Math.max(0, needMal_forCup - malPool_pre);
+    if (malR.base === 'Saburra') {
+      // Both flows (SP-step and Malachite-step) crush the same Saburra and yield
+      // both products at once — solve a 2x2 system (like Crusher/Grinder for Calx)
+      // to cover both Saburra Powder and Malachite with minimal surplus.
+      const spS = sabYield,               malS = (sabR.mal||0) * EM;
+      const spM = (malR.saburraP||0)*EM,  malM = malYield;
+      const det = spS*malM - spM*malS;
+      let S = 0, M = 0;
+      if (Math.abs(det) < 1e-9) {
+        // same recipe picked in both steps — one flow covers both products
+        S = Math.max(needSP/spS, malS > 0 ? needMal_forCup/malS : 0);
+      } else {
+        S = (needSP*malM - needMal_forCup*spM) / det;
+        M = (spS*needMal_forCup - malS*needSP) / det;
+        if (S < 0) { S = 0; M = Math.max(spM > 0 ? needSP/spM : 0, needMal_forCup/malM); }
+        if (M < 0) { M = 0; S = Math.max(needSP/spS, malS > 0 ? needMal_forCup/malS : 0); }
+      }
+      needSaburra_sp  = S * 10000;
+      needSaburra_mal = M * 10000;
+      sabWater_sp  = S * sabR.catAmt;
+      malFromSab   = S * malS;
+      sabPFromMal  = M * spM;
+      needMal_craft = M * malM;
+      const spProduced  = S*spS + M*spM;
+      const malProduced = S*malS + M*malM;
+      sabPBonus   = Math.max(0, spProduced - needSP);
+      malSabBonus = Math.max(0, malProduced - needMal_forCup);
+      bleckFromSaburra = (S*(sabR.bleckblende||0) + M*(malR.bleckblende||0)) * EM;
+    } else {
+      // Malachite from Calspar or Calx; the SP-step still yields Malachite as a byproduct
+      malFromSab = sabR.mal ? r(needSP, sabYield, sabR.mal) : 0;
+      needMal_craft = Math.max(0, needMal_forCup - malFromSab);
+      if (malR.base === 'Calspar') {
+        needCals_forMal = r(needMal_craft, malYield, 10000);
+      }
+      needSaburra_sp = r(needSP, sabYield, 10000);
+      sabWater_sp    = r(needSP, sabYield, sabR.catAmt);
+      bleckFromSaburra = (needSaburra_sp/10000) * (sabR.bleckblende||0) * EM;
     }
 
     const malCat = needMal_craft > 0 ? r(needMal_craft, malYield, malR.catAmt) : 0;
     const electrumFromMal = (malR.electrum && needMal_craft > 0) ? r(needMal_craft, malYield, malR.electrum) : 0;
     const chalkGlanceBonus = (malR.chalkGlance && needMal_craft > 0) ? r(needMal_craft, malYield, malR.chalkGlance) : 0;
-    const sabPFromMal = (malR.saburraP && needMal_craft > 0) ? r(needMal_craft, malYield, malR.saburraP) : 0;
 
     // ── CALSPAR (отдельный step, если Malachite из Calspar) ──
     calsYield = calsR.yield * EM;
@@ -1388,34 +1472,28 @@ export const METALS = [
     }
 
     // ── CALX (для Malachite, если base=Calx) ──
-    let needCalx_mal = 0, malWater_calx = 0, calxPowderFromMalCalx = 0, coalFromMalCalx = 0, calsparFromMalCalx = 0;
+    let needCalx_mal = 0, calxPowderFromMalCalx = 0, coalFromMalCalx = 0, calsparFromMalCalx = 0;
     if (malR.base === 'Calx') {
       needCalx_mal = r(needMal_craft, malYield, 10000);
-      malWater_calx = r(needMal_craft, malYield, malR.catAmt);
       calxPowderFromMalCalx = malR.calxPowder ? r(needMal_craft, malYield, malR.calxPowder) : 0;
       coalFromMalCalx = malR.coal ? r(needMal_craft, malYield, malR.coal) : 0;
       calsparFromMalCalx = malR.calspar ? r(needMal_craft, malYield, malR.calspar) : 0;
     }
 
-    // ── SABURRA (для Malachite, если base=Saburra) ──
-    let needSaburra_mal = 0, sabMalWater = 0;
-    if (malR.base === 'Saburra') {
-      needSaburra_mal = r(needMal_craft, malYield, 10000);
-      sabMalWater = r(needMal_craft, malYield, malR.catAmt);
-    }
+    // ── SABURRA totals ──
+    const sabPPool = sabPFromMal; // SP that came as a byproduct of the Malachite step
+    const totalSaburra = needSaburra_sp + needSaburra_mal;
 
-    const sabPPool = malFromSab + sabPFromMal;
-    const netSabP  = Math.max(0, needSP - sabPPool);
-    const needSaburra_sp = netSabP > 0 ? r(netSabP, sabYield, 10000) : 0;
-    const sabWater_sp    = netSabP > 0 ? r(netSabP, sabYield, sabR.catAmt) : 0;
-    const totalSaburra   = needSaburra_sp + needSaburra_mal;
-
-    // ── BLECK: вычитаем побочку из Cuprum (Amarantum-based) ──
+    // ── BLECK: credit the Cuprum (Amarantum) Bleck byproduct, then the
+    // Bleckblende that every crushed Saburra batch yields anyway ──
     const netBleck   = Math.max(0, needBleck - bleckFromCup);
     const bleckBonus = Math.max(0, bleckFromCup - needBleck);
     const bleckYield = bleckR.yield * EM;
     const needBleckBase = netBleck > 0 ? r(netBleck, bleckYield, 10000) : 0;
     const bleckCat = netBleck > 0 ? r(netBleck, bleckYield, bleckR.catAmt) : 0;
+    const bleckOreCredit = Math.min(bleckFromSaburra, needBleckBase);
+    const needBleckOre = Math.max(0, needBleckBase - bleckFromSaburra);
+    const bleckblendeBonus = Math.max(0, bleckFromSaburra - needBleckBase);
 
     // ── CALX POWDER: катализаторы Cuprum/Coke против побочек Calspar/Malachite-via-Calx ──
     const cpForCup = cupR.cat==='CalxPowder' ? r(needCup, cupYield, cupR.catAmt) : 0;
@@ -1465,10 +1543,9 @@ export const METALS = [
     const coalBonus = Math.max(0, coalFromCalx - totalCoalNeed) + coalPoolBonus;
     const cpBonus    = Math.max(0, (cpSupply + cpFromCalx) - cpDemand);
 
+    // (when the mal catalyst is Water it is already counted once via malCat)
     const needWater = sabWater_sp + calsWater + calxWaterForCP
-      + (malR.cat==='Water' ? malCat : 0)
-      + (malR.base==='Calx' ? malWater_calx : 0)
-      + (malR.base==='Saburra' ? sabMalWater : 0);
+      + (malR.cat==='Water' ? malCat : 0);
 
     const needBor = (cupR.cat==='Bor' ? r(needCup, cupYield, cupR.catAmt) : 0)
                   + (malR.cat==='Bor' ? malCat : 0)
@@ -1510,12 +1587,14 @@ export const METALS = [
       {name:'▸ BLECK', cls:'tree-section', amount:0, prefix:''},
       ...(bleckBonus>0?[{name:t('tree.bonusFromByproduct',{item:'Bleck',source:'Cuprum'}), cls:'base-easy', amount:bleckBonus, prefix:'   ', tag:'easy', tagLabel:'bonus'}]:[]),
       ...(netBleck>0?[{name:t('tree.xToY',{x:'Bleckblende',y:'Bleck'}), cls:'intermediate', amount:needBleckBase, prefix:'   └─ '}]:[]),
+      ...(bleckOreCredit>0?[{name:t('tree.byproductParenFrom',{item:'Bleckblende',source:'Saburra'}), cls:'base-easy', amount:bleckOreCredit, prefix:'      ', tag:'easy', tagLabel:'byproduct'}]:[]),
       {divider:true},
 
       // ── Saburra Powder
       {name:'▸ SABURRA POWDER', cls:'tree-section', amount:0, prefix:''},
       ...(sabPPool>0?[{name:t('tree.itemFromPoolN',{item:'Saburra Powder',n:Math.round(Math.min(sabPPool,needSP)).toLocaleString('ru')}), cls:'base-easy', amount:Math.min(sabPPool,needSP), prefix:'   ', tag:'easy', tagLabel:'byproduct'}]:[]),
-      ...(netSabP>0?[{name:t('tree.xToYCraftMore',{x:'Saburra',y:'Saburra Powder'}), cls:'intermediate', amount:needSaburra_sp, prefix:'   └─ '}]:[]),
+      ...(sabPBonus>0?[{name:t('tree.bonusParen',{item:'Saburra Powder'}), cls:'base-easy', amount:sabPBonus, prefix:'   ', tag:'easy', tagLabel:'bonus'}]:[]),
+      ...(needSaburra_sp>0?[{name:t('tree.xToYCraftMore',{x:'Saburra',y:'Saburra Powder'}), cls:'intermediate', amount:needSaburra_sp, prefix:'   └─ '}]:[]),
       {divider:true},
 
       // ── Malachite
@@ -1526,6 +1605,7 @@ export const METALS = [
       ...(malR.base==='Calspar'?[{name:t('tree.xToY',{x:'Calspar',y:'Malachite'}), cls:'intermediate', amount:needCals_forMal, prefix:'      └─ '}]:[]),
       ...(malR.base==='Calx'?[{name:t('tree.xToY',{x:'Calx',y:'Malachite'}), cls:'intermediate', amount:needCalx_mal, prefix:'      └─ '}]:[]),
       ...(malR.base==='Saburra'?[{name:t('tree.xToY',{x:'Saburra',y:'Malachite'}), cls:'intermediate', amount:needSaburra_mal, prefix:'      └─ '}]:[]),
+      ...(malSabBonus>0?[{name:t('tree.bonusParen',{item:'Malachite'}), cls:'base-easy', amount:malSabBonus, prefix:'      ', tag:'easy', tagLabel:'bonus'}]:[]),
       ...(electrumFromMal>0?[{name:t('tree.byproductParenFrom',{item:'Electrum',source:'Malachite'}), cls:'base-easy', amount:electrumFromMal, prefix:'      ', tag:'easy', tagLabel:'byproduct'}]:[]),
       ...(chalkGlanceBonus>0?[{name:t('tree.byproductParen',{item:'Chalk Glance'}), cls:'base-easy', amount:chalkGlanceBonus, prefix:'      ', tag:'easy', tagLabel:'bonus'}]:[]),
       ...(sabPFromMal>0?[{name:t('tree.byproductParenFrom',{item:'Saburra Powder',source:'Saburra'}), cls:'base-easy', amount:sabPFromMal, prefix:'      ', tag:'easy', tagLabel:'byproduct'}]:[]),
@@ -1559,7 +1639,8 @@ export const METALS = [
       {name:t('tree.totalBaseResources'), cls:'tree-section', amount:0, prefix:''},
       {divider:true},
       ...(needGranum>0?[{name:'Granum',      cls:'base-ore', amount:needGranum,     prefix:'', tag:'mine', tagLabel:'ore'}]:[]),
-      ...(needBleckBase>0?[{name:'Bleckblende', cls:'base-ore', amount:needBleckBase, prefix:'', tag:'mine', tagLabel:'ore'}]:[]),
+      ...(needBleckOre>0?[{name:'Bleckblende', cls:'base-ore', amount:needBleckOre, prefix:'', tag:'mine', tagLabel:'ore'}]:[]),
+      ...(bleckblendeBonus>0?[{name:t('tree.bonusParen',{item:'Bleckblende'}), cls:'base-easy', amount:bleckblendeBonus, prefix:'', tag:'easy', tagLabel:'bonus'}]:[]),
       ...(totalSaburra>0?[{name:'Saburra',    cls:'base-ore', amount:totalSaburra,   prefix:'', tag:'mine', tagLabel:'ore'}]:[]),
       ...(needCalx_total>0?[{name:'Calx',     cls:'base-ore', amount:needCalx_total, prefix:'', tag:'mine', tagLabel:'ore'}]:[]),
       ...(cpBonus>0?[{name:t('tree.bonusParen',{item:'Calx Powder'}), cls:'base-easy', amount:cpBonus, prefix:'', tag:'easy', tagLabel:'bonus'}]:[]),
