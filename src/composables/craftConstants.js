@@ -107,14 +107,14 @@ export const METALS = [
     const needAl      = r(needCron, RO, 5000);
     const needArc     = r(needCron, RO, 5000);
 
-    // ── GRAIN STEEL (суммарно) ──
+    // ── GRAIN STEEL (total) ──
     // Grain Steel: 10000 Pig Iron + 5000 Coke + 5000 Calx Powder → RO
     const needGS      = needGS_tung + needGS_cron;
     const needPig     = r(needGS, RO, 10000);
     const needCoke_gs = r(needGS, RO, 5000);
     const needCP_gs   = r(needGS, RO, 5000);
 
-    // ── ALMINE + ARCONITE: система уравнений для микса BF / GN ──
+    // ── ALMINE + ARCONITE: equation system for the BF / GN mix ──
     // BF: almine=400*EM, arconite=800*EM per batch (10000 Pyroxene)
     // GN: almine=2000*EM, arconite=160*EM per batch
     const BF_al=400*EM, BF_arc=800*EM, GN_al=2000*EM, GN_arc=160*EM;
@@ -149,9 +149,9 @@ export const METALS = [
     const rbYield   = rbR.yield * EM;
     const needTeph  = r(needRB, rbYield, 10000);
     const rbCat     = r(needRB, rbYield, rbR.catAmt);
-    const galbFromRB = r(needRB, rbYield, rbR.galb); // Galbinum побочка из Tephra
+    const galbFromRB = r(needRB, rbYield, rbR.galb); // Galbinum byproduct from Tephra
 
-    // ── BLOOD ORE ← база ──
+    // ── BLOOD ORE ← base ──
     const bloYield    = bloR.yield * EM;
     const needBO      = r(needPig, pigR.yield*EM, 10000);
     const cokeForPig  = pigR.isSulfur ? 0 : r(needPig, pigR.yield*EM, pigR.catAmt);
@@ -162,30 +162,30 @@ export const METALS = [
     const galbFromBlo = bloR.galbFromBlo ? r(needBO, bloYield, bloR.galb) : 0;
     const gpFromBlo   = bloR.gp ? r(needBO, bloYield, bloR.gp) : 0;
 
-    // ── GRANUM POWDER: побочка Blood Ore (crusher), если не хватает — доп. прогоны ──
+    // ── GRANUM POWDER: Blood Ore (crusher) byproduct; extra runs if not enough ──
     const gpExtra     = Math.max(0, needGP - gpFromBlo);
     const granumForGP = gpExtra > 0 ? r(gpExtra, 2940*EM, 10000) : 0;
     const bloFromGranumExtra = granumForGP > 0 ? r(granumForGP*EM, 10000, 770) : 0;
     const gpBonus     = Math.max(0, gpFromBlo - needGP);
 
-    // ── GALBINUM пул: нужно для Pyroxene + Lupium (если base=Galbinum) ──
+    // ── GALBINUM pool: needed for Pyroxene + Lupium (if base=Galbinum) ──
     const galbPool = galbFromRB + galbFromBlo;
 
-    // ── GALBINUM для Pyroxene ← вычитаем побочку ──
+    // ── GALBINUM for Pyroxene ← subtract the byproduct ──
     const netGalb_pyr = Math.max(0, needGalb_pyr - galbPool);
     const galbUsedFromPool = Math.min(galbPool, needGalb_pyr);
     const galbPoolRemainder = Math.max(0, galbPool - needGalb_pyr);
 
-    // ── LUPIUM: вычитаем побочку из Pyroxene ──
+    // ── LUPIUM: subtract the Pyroxene byproduct ──
     const netLup      = Math.max(0, needLup - lupFromPyr);
     const lupFromPyrUsed = Math.min(lupFromPyr, needLup);
     const lupBonus    = Math.max(0, lupFromPyr - needLup);
 
-    // Если нужно докрафтить Lupium
+    // If extra Lupium must be crafted
     const lupYield    = lupR.yield * EM;
     const needLupExtra = netLup > 0 ? r(netLup, lupYield, 10000) : 0;
     const lupCat      = netLup > 0 ? r(netLup, lupYield, lupR.catAmt) : 0;
-    // Если Lupium из Galbinum — нужен доп. Galbinum
+    // If Lupium comes from Galbinum — extra Galbinum is needed
     const needGalb_lup = (lupR.base==='Galbinum' && netLup>0) ? needLupExtra : 0;
     const cpForLup    = (lupR.cat==='CalxPowder' && netLup>0) ? lupCat : 0;
     const borForLup   = (lupR.cat==='Bor'        && netLup>0) ? lupCat : 0;
@@ -198,39 +198,39 @@ export const METALS = [
       needWS = needLupExtra;
       needAmarantum = r(needWS, 900*EM, 10000);
       granumForWS   = r(needAmarantum, 882*EM, 10000);
-      // Amarantum даёт побочки: Blood Ore (770), Granum Powder (2940)
+      // Amarantum yields byproducts: Blood Ore (770), Granum Powder (2940)
       granumFromAmarantum_blo = r(needAmarantum, 882*EM, 770);
       granumFromAmarantum_gp  = r(needAmarantum, 882*EM, 2940);
     }
 
-    // Итоговый Galbinum для крафта (Pyroxene + Lupium)
+    // Final Galbinum to craft (Pyroxene + Lupium)
     const totalGalbNeeded = netGalb_pyr + needGalb_lup;
     const galYield  = galR.yield * EM;
     const needGalBase = totalGalbNeeded > 0 ? r(totalGalbNeeded, galYield, 10000) : 0;
     const galCat    = totalGalbNeeded > 0 ? r(totalGalbNeeded, galYield, galR.catAmt) : 0;
     const bloFromGal = galR.bloByproduct ? r(totalGalbNeeded > 0 ? needGalBase : 0, galYield, galR.bloByproduct) : 0;
 
-    // ── CALX POWDER суммарно ──
+    // ── CALX POWDER total ──
     const cpForBlo  = bloR.cat==='CalxPowder' ? bloCat : 0;
     const cpForGal  = galR.cat==='CalxPowder' ? galCat : 0;
     const cpForRB   = rbR.cat==='CalxPowder'  ? rbCat  : 0;
     let totalCP = needCP_gs + cpForBlo + cpForAlmine + cpForPyr + cpForGal + cpForRB + cpForLup;
 
-    // ── COKE суммарно (предв., без coke-рецепта-катализатора) ──
+    // ── COKE total (preliminary, without the coke-recipe catalyst) ──
     const cokeForSang = sangR.cat==='Coke' ? sangCat : 0;
     const cokeForBlo  = bloR.cat==='Coke'  ? bloCat  : 0;
     const cokeForGal  = galR.cat==='Coke'  ? galCat  : 0;
     const totalCoke_pre = needCoke_gs + cokeForPig + cokeForPyr + cokeForSang + cokeForBlo + cokeForGal;
 
-    // Coke рецепт
+    // Coke recipe
     const cokeYield  = 7200 * EM;
     const needCoal_coke = r(totalCoke_pre, cokeYield, cokeR.coalTotal);
     const cpForCoke  = cokeR.useCalxPowder ? r(totalCoke_pre, cokeYield, cokeR.calxPowderCat) : 0;
     totalCP += cpForCoke;
 
-    // ── CALX: смешиваем Crusher/Grinder, чтобы закрыть Calx Powder и Coal без остатка ──
-    // (тот же приём, что и Almine/Arconite выше: оба рецепта дают Calx Powder + Coal
-    // из одной руды в разных пропорциях, поэтому можно попасть в обе потребности сразу)
+    // ── CALX: mix Crusher/Grinder to cover Calx Powder and Coal with no leftover ──
+    // (same trick as Almine/Arconite above: both recipes yield Calx Powder + Coal
+    // from the same ore in different ratios, so both needs can be hit at once)
     const calxCrusher = this.steps[5].options[0], calxGrinder = this.steps[5].options[1];
     const totalCoalNeed = needCoal_coke;
     const cpCr = calxCrusher.yield*EM, coalCr = calxCrusher.coal*EM;
@@ -255,7 +255,7 @@ export const METALS = [
     const netCoal = Math.max(0, totalCoalNeed - coalFromCalx);
     const coalBonus = Math.max(0, coalFromCalx - totalCoalNeed);
 
-    // ── БАЗОВЫЕ РУДЫ ──
+    // ── BASE ORES ──
     let needGranum=0, needGabore=0, needTephra=0;
     if (bloR.base==='Granum')  needGranum += needBloBase;
     if (bloR.base==='Gabore')  needGabore += needBloBase;
@@ -263,10 +263,10 @@ export const METALS = [
     if (galR.base==='Tephra')  needTephra += needGalBase;
     if (lupR.base==='Waterstone') needGranum += granumForWS;
     needGranum += granumForGP;
-    // Tephra из Red Bleckblende
+    // Tephra from Red Bleckblende
     needTephra += needTeph;
 
-    // ── КАТАЛИЗАТОРЫ ──
+    // ── CATALYSTS ──
     const needBor  = (rbR.cat==='Bor'  ? rbCat : 0)
                    + (bloR.cat==='Bor'  ? bloCat : 0)
                    + (galR.cat==='Bor'  ? galCat : 0)
@@ -278,7 +278,7 @@ export const METALS = [
                      + (galR.cat==='Water'   ? galCat  : 0)
                      + waterForCalx;
 
-    // ── ДЕРЕВО ──
+    // ── TREE ──
     const tree = [
       {name:'Oghmium',    cls:'final',        amount:T,         prefix:''},
       {divider:true},
@@ -434,7 +434,7 @@ export const METALS = [
     const needBloBase = r(needBO,bR.yield*EM,10000);
     const bloCat      = r(needBO,bR.yield*EM,bR.catAmt);
 
-    // ── COKE (выбираемый рецепт: Coal+Coal или Coal+Calx Powder) ──
+    // ── COKE (selectable recipe: Coal+Coal or Coal+Calx Powder) ──
     const totalCoke= needCoke_gs+cokePig+(sel.blo===1?bloCat:0);
     const cokeYield = 7200*EM;
     const needCoal_coke = r(totalCoke,cokeYield,cokeR.coalTotal);
@@ -443,7 +443,7 @@ export const METALS = [
     const cpExtra  = sel.blo===3?bloCat:0;
     const totalCP  = needCP_gs+cpExtra+cpForCoke;
 
-    // ── CALX: смешиваем Crusher/Grinder, чтобы закрыть Calx Powder и Coal без остатка ──
+    // ── CALX: mix Crusher/Grinder to cover Calx Powder and Coal with no leftover ──
     const calxCrusher = this.steps[1].options[0], calxGrinder = this.steps[1].options[1];
     const totalCoalNeed = needCoal_coke+needCoalSteel;
     const cpCr = calxCrusher.yield*EM, coalCr = calxCrusher.coal*EM;
@@ -538,10 +538,10 @@ export const METALS = [
       {label:'Fabricula + Calspar + Ichor',  furnace:'Fabricula',    input:'10 000 Calspar + 1 000 Ichor',     yield:1375, cat:'Ichor',      catAmt:1000, base:'Calspar', electrum:336, chalkGlance:210},
       {label:'Fabricula + Calspar + Sulfur', furnace:'Fabricula',    input:'10 000 Calspar + 700 Sulfur',      yield:334,  cat:'Sulfur',     catAmt:700,  base:'Calspar', electrum:112, chalkGlance:167},
       {label:'Fabricula + Calspar + Bor',    furnace:'Fabricula',    input:'10 000 Calspar + 900 Bor',         yield:3440, cat:'Bor',        catAmt:900,  base:'Calspar', electrum:560},
-      // Calx-based (даёт и Calspar и Malachite)
+      // Calx-based (yields both Calspar and Malachite)
       {label:'Crusher + Calx (gives Calspar+Mal)',furnace:'Crusher',  input:'10 000 Calx',                      yield:891,  cat:null,         catAmt:0,    base:'Calx', calspar:360, calxPowder:1361, coal:2151},
       {label:'Grinder + Calx + Water',           furnace:'Grinder',  input:'10 000 Calx + 1 000 Water',        yield:528,  cat:'Water',      catAmt:1000, base:'Calx', calspar:2000,calxPowder:2058, coal:1140},
-      // Saburra-based (даёт и Saburra Powder и Malachite)
+      // Saburra-based (yields both Saburra Powder and Malachite)
       {label:'Crusher + Saburra (gives SP+Mal)',  furnace:'Crusher',  input:'10 000 Saburra',                   yield:1584, cat:null,         catAmt:0,    base:'Saburra', saburraP:2000, bleckblende:1584},
       {label:'Grinder + Saburra + Water',        furnace:'Grinder',  input:'10 000 Saburra + 900 Water',       yield:950,  cat:'Water',      catAmt:900,  base:'Saburra', saburraP:4275, bleckblende:1900},
     ]},
@@ -578,32 +578,32 @@ export const METALS = [
 
     // ── MESSING: 10000 Cuprum + 5000 Calamine + 5000 Saburra Powder → RO ──
     const needCup = r(T, RO, 10000);
-    const needCal = r(T, RO, 5000);  // покупка
+    const needCal = r(T, RO, 5000);  // purchased
     const needSP  = r(T, RO, 5000);
 
     // ── SABURRA POWDER ──
     const sabYield    = sabR.yield * EM;
 
-    // ── MALACHITE для Cuprum (если нужен) ──
+    // ── MALACHITE for Cuprum (if needed) ──
     const cupYield = cupR.yield * EM;
-    const needCupBase = r(needCup, cupYield, 10000); // базовый материал для Cuprum
+    const needCupBase = r(needCup, cupYield, 10000); // base material for Cuprum
 
-    // Electrum побочка из Cuprum (Amarantum рецепты)
+    // Electrum byproduct from Cuprum (Amarantum recipes)
     const electrumFromCup = cupR.electrum ? r(needCup, cupYield, cupR.electrum) : 0;
     const calamineFromCup = cupR.calamine ? r(needCup, cupYield, cupR.calamine) : 0;
     const waterstoneFromCup = cupR.waterstone ? r(needCup, cupYield, cupR.waterstone) : 0;
 
-    // ── MALACHITE (если Cuprum из Malachite) ──
+    // ── MALACHITE (if Cuprum comes from Malachite) ──
     let needMal_forCup = 0;
     if (cupR.base === 'Malachite') needMal_forCup = needCupBase;
 
-    // ── AMARANTUM (если Cuprum из Amarantum) ──
+    // ── AMARANTUM (if Cuprum comes from Amarantum) ──
     let needAmarantum_forCup = 0;
     if (cupR.base === 'Amarantum') needAmarantum_forCup = needCupBase;
     // Amarantum → Granum
     const needGranum_cup = needAmarantum_forCup > 0 ? r(needAmarantum_forCup, 882*EM, 10000) : 0;
 
-    // ── MALACHITE: из Saburra (совместно с SP — 2x2 решатель), либо из Calspar/Calx ──
+    // ── MALACHITE: from Saburra (jointly with SP — 2x2 solver), or from Calspar/Calx ──
     const malYield = malR.yield * EM;
     let needMal_craft = 0, needCals_forMal = 0, calsYield = 0;
     let malFromSab = 0, sabPFromMal = 0;
@@ -611,15 +611,15 @@ export const METALS = [
     let sabPBonus = 0, malSabBonus = 0;
 
     if (malR.base === 'Saburra') {
-      // Оба потока (SP-шаг и Malachite-шаг) дробят одну и ту же Saburra и дают
-      // оба продукта сразу — решаем 2x2 систему (как Crusher/Grinder для Calx),
-      // чтобы закрыть и Saburra Powder, и Malachite с минимальным излишком.
+      // Both flows (SP-step and Malachite-step) crush the same Saburra and yield
+      // both products at once — solve a 2x2 system (like Crusher/Grinder for Calx)
+      // to cover both Saburra Powder and Malachite with minimal surplus.
       const spS = sabYield,               malS = (sabR.mal||0) * EM;
       const spM = (malR.saburraP||0)*EM,  malM = malYield;
       const det = spS*malM - spM*malS;
       let S = 0, M = 0;
       if (Math.abs(det) < 1e-9) {
-        // в обоих шагах выбран один и тот же рецепт — один поток закрывает оба продукта
+        // same recipe picked in both steps — one flow covers both products
         S = Math.max(needSP/spS, malS > 0 ? needMal_forCup/malS : 0);
       } else {
         S = (needSP*malM - needMal_forCup*spM) / det;
@@ -638,7 +638,7 @@ export const METALS = [
       sabPBonus   = Math.max(0, spProduced - needSP);
       malSabBonus = Math.max(0, malProduced - needMal_forCup);
     } else {
-      // Malachite из Calspar или Calx; SP-шаг всё равно даёт Malachite побочкой
+      // Malachite from Calspar or Calx; the SP-step still yields Malachite as a byproduct
       malFromSab = sabR.mal ? r(needSP, sabYield, sabR.mal) : 0;
       needMal_craft = Math.max(0, needMal_forCup - malFromSab);
       if (malR.base === 'Calspar') {
@@ -652,11 +652,11 @@ export const METALS = [
     const electrumFromMal = (malR.electrum && needMal_craft > 0) ? r(needMal_craft, malYield, malR.electrum) : 0;
     const chalkGlanceBonus = (malR.chalkGlance && needMal_craft > 0) ? r(needMal_craft, malYield, malR.chalkGlance) : 0;
 
-    // ── CALSPAR (отдельный step, если нужен) ──
+    // ── CALSPAR (separate step, if needed) ──
     calsYield = calsR.yield * EM;
-    // Если mal step не использует Calspar step отдельно (base=Calx или base=Saburra),
-    // то cals step может быть нужен для чего-то ещё — но в Messing нет другого применения
-    // Если mal base=Calspar — cals step нужен
+    // If the mal step does not use the Calspar step directly (base=Calx or base=Saburra),
+    // the cals step could be needed for something else — but Messing has no other use for it
+    // If mal base=Calspar — the cals step is needed
     let needCalx_cals = 0, calsWater = 0;
     let malFromCalsStep = 0, calxPowderFromCals = 0, coalFromCals = 0;
 
@@ -668,7 +668,7 @@ export const METALS = [
       coalFromCals  = calsR.coal ? r(needCals_forMal, calsYield, calsR.coal) : 0;
     }
 
-    // ── CALX (для Calspar, или напрямую для Malachite) ──
+    // ── CALX (for Calspar, or directly for Malachite) ──
     let needCalx_mal = 0, calxPowderFromMalCalx = 0, coalFromMalCalx = 0, calsparFromMalCalx = 0;
     if (malR.base === 'Calx') {
       needCalx_mal = r(needMal_craft, malYield, 10000);
@@ -677,18 +677,18 @@ export const METALS = [
       calsparFromMalCalx = malR.calspar ? r(needMal_craft, malYield, malR.calspar) : 0;
     }
 
-    // ── SABURRA суммарно ──
-    const sabPPool = sabPFromMal; // SP, пришедший побочкой из Malachite-шага
+    // ── SABURRA totals ──
+    const sabPPool = sabPFromMal; // SP that came as a byproduct of the Malachite step
     const totalSaburra = needSaburra_sp + needSaburra_mal;
 
-    // ── CALX POWDER: катализаторы Cuprum/Coke против побочек Calspar/Malachite-via-Calx ──
+    // ── CALX POWDER: Cuprum/Coke catalysts vs Calspar/Malachite-via-Calx byproducts ──
     const cpForCup = cupR.cat==='CalxPowder' ? r(needCup, cupYield, cupR.catAmt) : 0;
     const cpSupply = calxPowderFromCals + calxPowderFromMalCalx;
 
-    // ── CALX суммарно (для Calspar / Malachite-via-Calx) ──
+    // ── CALX total (for Calspar / Malachite-via-Calx) ──
     const needCalxTotal = needCalx_cals + needCalx_mal;
 
-    // ── COAL / COKE: Cuprum и Malachite могут требовать Coal напрямую или через Coke ──
+    // ── COAL / COKE: Cuprum and Malachite may need Coal directly or via Coke ──
     const cupCoal  = cupR.cat==='Coal' ? r(needCup, cupYield, cupR.catAmt) : 0;
     const malCoke  = malR.cat==='Coke' ? malCat : 0;
     const cupCoke  = cupR.cat==='Coke' ? r(needCup, cupYield, cupR.catAmt) : 0;
@@ -697,12 +697,12 @@ export const METALS = [
     const needCoal_coke = totalCoke > 0 ? r(totalCoke, cokeYield, cokeR.coalTotal) : 0;
     const cpForCoke = (totalCoke > 0 && cokeR.useCalxPowder) ? r(totalCoke, cokeYield, cokeR.calxPowderCat) : 0;
 
-    // ── CALX POWDER дефицит: сколько докрафтить сверх побочек Calspar/Malachite ──
+    // ── CALX POWDER deficit: how much to craft beyond the Calspar/Malachite byproducts ──
     const cpDemand  = cpForCup + cpForCoke;
     const cpDeficit = Math.max(0, cpDemand - cpSupply);
 
-    // ── CALX: смешиваем Crusher/Grinder, чтобы закрыть дефицит Calx Powder и Coal без остатка ──
-    // (Coal-побочка из Calspar/Malachite-via-Calx крафта засчитывается в счёт нужды заранее)
+    // ── CALX: mix Crusher/Grinder to cover the Calx Powder deficit and Coal with no leftover ──
+    // (the Coal byproduct of the Calspar/Malachite-via-Calx craft is credited toward the need up front)
     const coalPool = coalFromCals + coalFromMalCalx;
     const totalCoalNeedGross = cupCoal + needCoal_coke;
     const totalCoalNeed = Math.max(0, totalCoalNeedGross - coalPool);
@@ -731,21 +731,21 @@ export const METALS = [
     const coalBonus = Math.max(0, coalFromCalx - totalCoalNeed) + coalPoolBonus;
     const cpBonus    = Math.max(0, (cpSupply + cpFromCalx) - cpDemand);
 
-    // ── БАЗОВЫЕ РУДЫ ──
+    // ── BASE ORES ──
     let needGranum = needGranum_cup;
     const needCalx_total = needCalxTotal + needCalxForCP;
 
-    // ── ИТОГО ВОДА ──
-    // (malWater_calx/sabMalWater численно равны malCat при водном катализаторе —
-    // учитываем один раз через malCat, иначе вода задваивается)
+    // ── WATER TOTAL ──
+    // (malWater_calx/sabMalWater numerically equal malCat with a Water catalyst —
+    // count it once via malCat, otherwise the water is doubled)
     const needWater = sabWater_sp + calsWater + calxWaterForCP
       + (malR.cat==='Water' ? malCat : 0);
 
-    // ── БОР ──
+    // ── BOR ──
     const needBor = (cupR.cat==='Bor' ? r(needCup, cupYield, cupR.catAmt) : 0)
                   + (malR.cat==='Bor' ? malCat : 0);
 
-    // ── ПОКУПНЫЕ ──
+    // ── PURCHASED ──
     const needIchor      = malR.cat==='Ichor'      ? malCat : 0;
     const needDragonSalt = malR.cat==='DragonSalt' ? malCat : 0;
     const needSulfur_mal = malR.cat==='Sulfur'     ? malCat : 0;
@@ -974,16 +974,16 @@ export const METALS = [
     const needBor  = needBorGem+needBorCup+needBorMal;
     const needIchor= malR.cat==='Ichor'?malCat:0;
 
-    // ── COKE / COAL: Cuprum может требовать Coke (крафтится из Coal) ──
+    // ── COKE / COAL: Cuprum may need Coke (crafted from Coal) ──
     const cupCoke = sel.cup===1?cupCat:0;
     const cokeYield = 7200*EM;
     const needCoal_coke = cupCoke>0 ? r(cupCoke, cokeYield, cokeR.coalTotal) : 0;
     const cpForCoke = (cupCoke>0 && cokeR.useCalxPowder) ? r(cupCoke, cokeYield, cokeR.calxPowderCat) : 0;
 
-    // ── CALX POWDER: Almine требует её как катализатор всегда (оба варианта al-шага) ──
+    // ── CALX POWDER: Almine always needs it as a catalyst (both al-step options) ──
     const cpDeficit = alCat + cpForCoke;
 
-    // ── CALX: смешиваем Crusher/Grinder, чтобы закрыть Calx Powder (для Almine+Coke) и Coal без остатка ──
+    // ── CALX: mix Crusher/Grinder to cover Calx Powder (for Almine+Coke) and Coal with no leftover ──
     const calxCrusher = this.steps[7].options[0], calxGrinder = this.steps[7].options[1];
     const totalCoalNeed = needCoal_coke;
     const cpCr = calxCrusher.yield*EM, coalCr = calxCrusher.coal*EM;
@@ -1146,24 +1146,24 @@ export const METALS = [
     const bloYield    = bloR.yield * EM;
     const needBloBase = r(needBO, bloYield, 10000);
     const bloCat      = r(needBO, bloYield, bloR.catAmt);
-    // Galbinum побочка из Blood Ore рецепта
+    // Galbinum byproduct from the Blood Ore recipe
     const galbFromBlo = bloR.galbFromBlo ? r(needBO, bloYield, bloR.galb) : 0;
 
-    // ── Almine + Arconite: решаем систему уравнений для микса BF и GN ──
-    // BF:  400*EM Almine + 800*EM Arconite за 10000 Pyroxene
-    // GN: 2000*EM Almine + 160*EM Arconite за 10000 Pyroxene
+    // ── Almine + Arconite: solve the equation system for the BF/GN mix ──
+    // BF:  400*EM Almine + 800*EM Arconite per 10000 Pyroxene
+    // GN: 2000*EM Almine + 160*EM Arconite per 10000 Pyroxene
     // x*400*EM + y*2000*EM = needAl
     // x*800*EM + y*160*EM  = needArc
     const aBF_al=400*EM, aBF_arc=800*EM, aGN_al=2000*EM, aGN_arc=160*EM;
-    const det = aBF_al*aGN_arc - aGN_al*aBF_arc; // всегда != 0
-    // прогонов за 10000 Pyroxene:
+    const det = aBF_al*aGN_arc - aGN_al*aBF_arc; // always != 0
+    // runs per 10000 Pyroxene:
     let xBF = (needAl*aGN_arc - needArc*aGN_al) / det;
     let yGN = (aBF_al*needArc - aBF_arc*needAl) / det;
-    // если отрицательное — зажимаем в 0 и пересчитываем по одной печи
+    // if negative — clamp to 0 and recompute with a single furnace
     if (xBF < 0) { xBF=0; yGN=Math.max(needAl/aGN_al, needArc/aGN_arc); }
     if (yGN < 0) { yGN=0; xBF=Math.max(needAl/aBF_al, needArc/aBF_arc); }
     const pyroxeneForAl = (xBF + yGN) * 10000;
-    const calxPowderForAl = (xBF + yGN) * 800; // одинаковый катализатор у обоих
+    const calxPowderForAl = (xBF + yGN) * 800; // both use the same catalyst
 
     // ── Pyroxene ← Galbinum ──
     const pyrYield = pyrR.yield * EM;
@@ -1171,40 +1171,40 @@ export const METALS = [
     const cokePyr       = (pyrR.cat==='Coke')       ? r(pyroxeneForAl, pyrYield, pyrR.catAmt) : 0;
     const calxPowderPyr = (pyrR.cat==='CalxPowder') ? r(pyroxeneForAl, pyrYield, pyrR.catAmt) : 0;
     const borPyr        = (pyrR.cat==='Bor')        ? r(pyroxeneForAl, pyrYield, pyrR.catAmt) : 0;
-    const lupFromPyr    = r(pyroxeneForAl, pyrYield, pyrR.lup); // побочка Lupium
+    const lupFromPyr    = r(pyroxeneForAl, pyrYield, pyrR.lup); // Lupium byproduct
     const pyriteFromPyr = pyrR.pyrite ? r(pyroxeneForAl, pyrYield, pyrR.pyrite) : 0;
 
-    // ── Galbinum: нужно needGalb_pyr, вычитаем побочку из Blood Ore ──
+    // ── Galbinum: need needGalb_pyr, subtract the Blood Ore byproduct ──
     const netGalb    = Math.max(0, needGalb_pyr - galbFromBlo);
     const galFromBloUsed = Math.min(galbFromBlo, needGalb_pyr);
 
     const galYield   = galR.yield * EM;
     const needGalBase = r(netGalb, galYield, 10000);
     const galCat     = r(netGalb, galYield, galR.catAmt);
-    const bloFromGal = galR.bloByproduct ? r(netGalb, galYield, galR.bloByproduct) : 0; // Blood Ore побочка из Galbinum
+    const bloFromGal = galR.bloByproduct ? r(netGalb, galYield, galR.bloByproduct) : 0; // Blood Ore byproduct from Galbinum
 
-    // ── Calx Powder суммарно ──
-    // нужно: для GS, для Blood Ore рецепта (если Attractor), для Almine/Arconite, для Pyroxene, для Galbinum рецепта
+    // ── Calx Powder total ──
+    // needed: for GS, for the Blood Ore recipe (if Attractor), for Almine/Arconite, for Pyroxene, for the Galbinum recipe
     const cpForBlo = (bloR.cat==='CalxPowder') ? bloCat : 0;
     const cpForGal = (galR.cat==='CalxPowder') ? galCat : 0;
     let totalCP = needCP_gs + cpForBlo + calxPowderForAl + calxPowderPyr + cpForGal;
 
-    // Coke для Coke рецепта (Calx Powder катализатор) тоже добавим ниже после расчёта Coke
+    // the Coke recipe itself may need Calx Powder — added below after the Coke calc
 
-    // Coke суммарно (предварительно без cokeCalxPowder-катализатора)
+    // Coke total (preliminary, without the cokeCalxPowder catalyst)
     const cokeBlo = (bloR.cat==='Coke') ? bloCat : 0;
     const cokeGal = (galR.cat==='Coke') ? galCat : 0;
     const cokeTotal_pre = needCoke_gs + cokePig + cokeBlo + cokeGal + cokePyr;
 
-    // Coke рецепт
+    // Coke recipe
     const cokeYield = 7200 * EM;
     const needCoal_for_coke = r(cokeTotal_pre, cokeYield, cokeR.coalTotal);
     const cpForCoke = cokeR.useCalxPowder ? r(cokeTotal_pre, cokeYield, cokeR.calxPowderCat) : 0;
 
-    // добавляем cpForCoke в totalCP
+    // add cpForCoke to totalCP
     totalCP += cpForCoke;
 
-    // ── Calx: смешиваем Crusher/Grinder, чтобы закрыть Calx Powder и Coal без остатка ──
+    // ── Calx: mix Crusher/Grinder to cover Calx Powder and Coal with no leftover ──
     const calxCrusher = this.steps[2].options[0], calxGrinder = this.steps[2].options[1];
     const totalCoalNeed = needCoal_for_coke;
     const cpCr = calxCrusher.yield*EM, coalCr = calxCrusher.coal*EM;
@@ -1225,18 +1225,18 @@ export const METALS = [
     const waterCalx      = yGrinder * calxGrinder.catAmt;
     const coalFromCalx   = xCrusher*coalCr + yGrinder*coalGr;
 
-    // Coal: нужно для Coke, часть покрывается побочкой из Calx
+    // Coal: needed for Coke, partly covered by the Calx byproduct
     const netCoal = Math.max(0, totalCoalNeed - coalFromCalx);
     const coalBonus = Math.max(0, coalFromCalx - totalCoalNeed);
 
-    // ── Базовые руды ──
+    // ── Base ores ──
     let needGranum=0, needGabore=0, needTephra=0;
     if (bloR.base==='Granum') needGranum += needBloBase;
     if (bloR.base==='Gabore') needGabore += needBloBase;
     if (galR.base==='Gabore') needGabore += needGalBase;
     if (galR.base==='Tephra') needTephra += needGalBase;
 
-    // ── Катализаторы итого ──
+    // ── Catalysts total ──
     const needBor =
       (bloR.cat==='Bor' ? bloCat : 0) +
       (galR.cat==='Bor' ? galCat : 0) +
@@ -1341,10 +1341,10 @@ export const METALS = [
       {label:'Fabricula + Calspar + Ichor',  furnace:'Fabricula',    input:'10 000 Calspar + 1 000 Ichor',     yield:1375, cat:'Ichor',      catAmt:1000, base:'Calspar', electrum:336, chalkGlance:210},
       {label:'Fabricula + Calspar + Sulfur', furnace:'Fabricula',    input:'10 000 Calspar + 700 Sulfur',      yield:334,  cat:'Sulfur',     catAmt:700,  base:'Calspar', electrum:112, chalkGlance:167},
       {label:'Fabricula + Calspar + Bor',    furnace:'Fabricula',    input:'10 000 Calspar + 900 Bor',         yield:3440, cat:'Bor',        catAmt:900,  base:'Calspar', electrum:560},
-      // Calx-based (даёт и Calspar и Malachite)
+      // Calx-based (yields both Calspar and Malachite)
       {label:'Crusher + Calx (gives Calspar+Mal)',furnace:'Crusher',  input:'10 000 Calx',                      yield:891,  cat:null,         catAmt:0,    base:'Calx', calspar:360, calxPowder:1361, coal:2151},
       {label:'Grinder + Calx + Water',           furnace:'Grinder',  input:'10 000 Calx + 1 000 Water',        yield:528,  cat:'Water',      catAmt:1000, base:'Calx', calspar:2000,calxPowder:2058, coal:1140},
-      // Saburra-based (даёт и Saburra Powder и Malachite)
+      // Saburra-based (yields both Saburra Powder and Malachite)
       {label:'Crusher + Saburra (gives SP+Mal)',  furnace:'Crusher',  input:'10 000 Saburra',                   yield:1584, cat:null,         catAmt:0,    base:'Saburra', saburraP:2000, bleckblende:1584},
       {label:'Grinder + Saburra + Water',        furnace:'Grinder',  input:'10 000 Saburra + 900 Water',       yield:950,  cat:'Water',      catAmt:900,  base:'Saburra', saburraP:4275, bleckblende:1900},
     ]},
@@ -1401,7 +1401,7 @@ export const METALS = [
     const electrumFromCup = cupR.electrum ? r(needCup, cupYield, cupR.electrum) : 0;
     const calamineFromCup = cupR.calamine ? r(needCup, cupYield, cupR.calamine) : 0;
     const waterstoneFromCup = cupR.waterstone ? r(needCup, cupYield, cupR.waterstone) : 0;
-    const bleckFromCup = cupR.bleck ? r(needCup, cupYield, cupR.bleck) : 0; // побочка Bleck из Amarantum-Cuprum
+    const bleckFromCup = cupR.bleck ? r(needCup, cupYield, cupR.bleck) : 0; // Bleck byproduct from Amarantum-based Cuprum
 
     let needMal_forCup = 0;
     if (cupR.base === 'Malachite') needMal_forCup = needCupBase;
@@ -1460,7 +1460,7 @@ export const METALS = [
     const electrumFromMal = (malR.electrum && needMal_craft > 0) ? r(needMal_craft, malYield, malR.electrum) : 0;
     const chalkGlanceBonus = (malR.chalkGlance && needMal_craft > 0) ? r(needMal_craft, malYield, malR.chalkGlance) : 0;
 
-    // ── CALSPAR (отдельный step, если Malachite из Calspar) ──
+    // ── CALSPAR (separate step, if Malachite comes from Calspar) ──
     calsYield = calsR.yield * EM;
     let needCalx_cals = 0, calsWater = 0, malFromCalsStep = 0, calxPowderFromCals = 0, coalFromCals = 0;
     if (malR.base === 'Calspar') {
@@ -1471,7 +1471,7 @@ export const METALS = [
       coalFromCals  = calsR.coal ? r(needCals_forMal, calsYield, calsR.coal) : 0;
     }
 
-    // ── CALX (для Malachite, если base=Calx) ──
+    // ── CALX (for Malachite, if base=Calx) ──
     let needCalx_mal = 0, calxPowderFromMalCalx = 0, coalFromMalCalx = 0, calsparFromMalCalx = 0;
     if (malR.base === 'Calx') {
       needCalx_mal = r(needMal_craft, malYield, 10000);
@@ -1495,12 +1495,12 @@ export const METALS = [
     const needBleckOre = Math.max(0, needBleckBase - bleckFromSaburra);
     const bleckblendeBonus = Math.max(0, bleckFromSaburra - needBleckBase);
 
-    // ── CALX POWDER: катализаторы Cuprum/Coke против побочек Calspar/Malachite-via-Calx ──
+    // ── CALX POWDER: Cuprum/Coke catalysts vs Calspar/Malachite-via-Calx byproducts ──
     const cpForCup = cupR.cat==='CalxPowder' ? r(needCup, cupYield, cupR.catAmt) : 0;
     const cpSupply = calxPowderFromCals + calxPowderFromMalCalx;
     const needCalxTotal = needCalx_cals + needCalx_mal;
 
-    // ── COAL / COKE: Cuprum и Malachite могут требовать Coal напрямую или через Coke ──
+    // ── COAL / COKE: Cuprum and Malachite may need Coal directly or via Coke ──
     const cupCoal  = cupR.cat==='Coal' ? r(needCup, cupYield, cupR.catAmt) : 0;
     const malCoke  = malR.cat==='Coke' ? malCat : 0;
     const cupCoke  = cupR.cat==='Coke' ? r(needCup, cupYield, cupR.catAmt) : 0;
@@ -1509,12 +1509,12 @@ export const METALS = [
     const needCoal_coke = totalCoke > 0 ? r(totalCoke, cokeYield, cokeR.coalTotal) : 0;
     const cpForCoke = (totalCoke > 0 && cokeR.useCalxPowder) ? r(totalCoke, cokeYield, cokeR.calxPowderCat) : 0;
 
-    // ── CALX POWDER дефицит: сколько докрафтить сверх побочек Calspar/Malachite ──
+    // ── CALX POWDER deficit: how much to craft beyond the Calspar/Malachite byproducts ──
     const cpDemand  = cpForCup + cpForCoke;
     const cpDeficit = Math.max(0, cpDemand - cpSupply);
 
-    // ── CALX: смешиваем Crusher/Grinder, чтобы закрыть дефицит Calx Powder и Coal без остатка ──
-    // (Coal-побочка из Calspar/Malachite-via-Calx крафта засчитывается в счёт нужды заранее)
+    // ── CALX: mix Crusher/Grinder to cover the Calx Powder deficit and Coal with no leftover ──
+    // (the Coal byproduct of the Calspar/Malachite-via-Calx craft is credited toward the need up front)
     const coalPool = coalFromCals + coalFromMalCalx;
     const totalCoalNeedGross = cupCoal + needCoal_coke;
     const totalCoalNeed = Math.max(0, totalCoalNeedGross - coalPool);
@@ -1725,19 +1725,19 @@ export const METALS = [
     const cokeForPig  = pigR.isSulfur ? 0 : r(needPig, pigYield, pigR.catAmt);
     const sulfurForPig= pigR.isSulfur ? r(needPig, pigYield, pigR.catAmt) : 0;
 
-    // ── Blood Ore ← база ──
+    // ── Blood Ore ← base ──
     const bloYield    = bloR.yield * EM;
     const needBloBase = r(needBO, bloYield, 10000);
     const bloCat      = r(needBO, bloYield, bloR.catAmt);
     const galbFromBlo = bloR.galbFromBlo ? r(needBO, bloYield, bloR.galb) : 0;
     const gpFromBlo   = bloR.gp ? r(needBO, bloYield, bloR.gp) : 0;
 
-    // ── GRANUM POWDER: побочка Blood Ore (crusher), если не хватает — доп. прогоны ──
+    // ── GRANUM POWDER: Blood Ore (crusher) byproduct; extra runs if not enough ──
     const gpExtra     = Math.max(0, needGP - gpFromBlo);
     const granumForGP = gpExtra > 0 ? r(gpExtra, 2940*EM, 10000) : 0;
     const gpBonus     = Math.max(0, gpFromBlo - needGP);
 
-    // ── LUPIUM: прямая цель, докрафтить весь объём ──
+    // ── LUPIUM: direct target, craft the full amount ──
     const lupYield    = lupR.yield * EM;
     const needLupExtra = r(needLup, lupYield, 10000);
     const lupCat      = r(needLup, lupYield, lupR.catAmt);
@@ -1756,7 +1756,7 @@ export const METALS = [
       granumFromAmarantum_gp  = r(needAmarantum, 882*EM, 2940);
     }
 
-    // ── GALBINUM пул: нужно для Lupium (если base=Galbinum), вычитаем побочку из Blood Ore ──
+    // ── GALBINUM pool: needed for Lupium (if base=Galbinum), minus the Blood Ore byproduct ──
     const galbPool = galbFromBlo;
     const netGalb_lup = Math.max(0, needGalb_lup - galbPool);
     const galbUsedFromPool = Math.min(galbPool, needGalb_lup);
@@ -1767,24 +1767,24 @@ export const METALS = [
     const galCat    = netGalb_lup > 0 ? r(netGalb_lup, galYield, galR.catAmt) : 0;
     const bloFromGal = galR.bloByproduct ? r(netGalb_lup > 0 ? needGalBase : 0, galYield, galR.bloByproduct) : 0;
 
-    // ── CALX POWDER суммарно ──
+    // ── CALX POWDER total ──
     const cpForBlo  = bloR.cat==='CalxPowder' ? bloCat : 0;
     const cpForGal  = galR.cat==='CalxPowder' ? galCat : 0;
     const cpForLup  = lupR.cat==='CalxPowder' ? lupCat : 0;
     let totalCP = needCP_gs + cpForBlo + cpForGal + cpForLup;
 
-    // ── COKE суммарно (предв.) ──
+    // ── COKE total (preliminary) ──
     const cokeForBlo  = bloR.cat==='Coke' ? bloCat : 0;
     const cokeForGal  = galR.cat==='Coke' ? galCat : 0;
     const totalCoke_pre = needCoke_gs + cokeForPig + cokeForBlo + cokeForGal;
 
-    // Coke рецепт
+    // Coke recipe
     const cokeYield  = 7200 * EM;
     const needCoal_coke = r(totalCoke_pre, cokeYield, cokeR.coalTotal);
     const cpForCoke  = cokeR.useCalxPowder ? r(totalCoke_pre, cokeYield, cokeR.calxPowderCat) : 0;
     totalCP += cpForCoke;
 
-    // ── CALX: смешиваем Crusher/Grinder, чтобы закрыть Calx Powder и Coal без остатка ──
+    // ── CALX: mix Crusher/Grinder to cover Calx Powder and Coal with no leftover ──
     const calxCrusher = this.steps[2].options[0], calxGrinder = this.steps[2].options[1];
     const totalCoalNeed = needCoal_coke;
     const cpCr = calxCrusher.yield*EM, coalCr = calxCrusher.coal*EM;
@@ -1809,7 +1809,7 @@ export const METALS = [
     const netCoal = Math.max(0, totalCoalNeed - coalFromCalx);
     const coalBonus = Math.max(0, coalFromCalx - totalCoalNeed);
 
-    // ── БАЗОВЫЕ РУДЫ ──
+    // ── BASE ORES ──
     let needGranum=0, needGabore=0, needTephra=0;
     if (bloR.base==='Granum')  needGranum += needBloBase;
     if (bloR.base==='Gabore')  needGabore += needBloBase;
@@ -1818,7 +1818,7 @@ export const METALS = [
     if (lupR.base==='Waterstone') needGranum += granumForWS;
     needGranum += granumForGP;
 
-    // ── КАТАЛИЗАТОРЫ ──
+    // ── CATALYSTS ──
     const needBor  = (bloR.cat==='Bor' ? bloCat : 0)
                    + (galR.cat==='Bor' ? galCat : 0)
                    + borForLup;
