@@ -1,0 +1,36 @@
+{
+  "name": "alchemy-dev",
+  "build": {
+    "dockerfile": "Dockerfile"
+  },
+  "workspaceFolder": "/workspaces/alchemy",
+  "remoteUser": "node",
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "dbaeumer.vscode-eslint",
+        "esbenp.prettier-vscode",
+        "Vue.volar",
+        "ms-vscode.vscode-typescript-next"
+      ],
+      "settings": {
+        "terminal.integrated.defaultProfile.linux": "bash"
+      }
+    }
+  },
+  "mounts": [
+    "source=alchemy-claude-home,target=/home/node/.claude,type=volume"
+  ],
+  "postCreateCommand": "pnpm install",
+  "runArgs": [
+    "--network=alchemy-restricted",
+    "--cap-drop=ALL",
+    "--cap-add=CHOWN",
+    "--cap-add=FOWNER",
+    "--security-opt=no-new-privileges:true"
+  ],
+  "containerEnv": {
+    "NODE_ENV": "development",
+    "FORCE_COLOR": "1"
+  }
+}
