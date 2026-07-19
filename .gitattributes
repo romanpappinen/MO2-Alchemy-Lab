@@ -1,0 +1,9 @@
+# Normalize line endings: every text file is stored and checked out with LF,
+# regardless of the editor/OS (stops IDE-side CRLF conversions from producing
+# whole-file diffs). Binaries are exempted explicitly.
+* text=auto eol=lf
+
+*.png binary
+*.jpg binary
+*.ico binary
+*.xlsx binary
