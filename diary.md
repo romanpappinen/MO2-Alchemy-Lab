@@ -202,3 +202,31 @@ Also add `"test": "node --test tests/"` to package.json scripts when landing.
   longer show the spurious "Coal 0" line.
 
 **Next concrete step:** none — all PLAN.md items are done.
+
+## 2026-07-19 — Remove the built-in default recipe from Alchemy Lab
+
+**What changed:**
+- Deleted `src/composables/presetPotions.js` (the seeded "V1" example
+  recipe) per user request — the app should ship only the reagent library,
+  no default recipe. `presetIngredients.js` is untouched.
+- `usePotionStore.js` `loadPotions()`: no longer seeds anything on a fresh
+  install, and now also purges previously-seeded copies from returning
+  visitors' localStorage (records with `preset:true`; saving/editing a
+  recipe rebuilds the record without that flag, so user-modified copies
+  survive). Also restored the file's LF line endings — the working tree had
+  a whole-file CRLF conversion from the IDE (content was identical to HEAD),
+  which would otherwise have drowned the real diff.
+
+**What was verified:**
+- eslint on `usePotionStore.js`: 3 remaining errors are all pre-existing at
+  HEAD (splice style, two empty catch blocks); no new issues, one HEAD error
+  disappeared with the removed deep-clone code.
+- Playwright vs `npm run dev`: fresh visitor — Recipes tab count 0, no V1,
+  localStorage stays empty; returning visitor with a seeded `preset:true` V1
+  plus an own recipe — V1 gone from both UI and re-persisted localStorage,
+  own recipe intact; Reagents library still lists all 18 entries; no console
+  errors.
+
+**Next concrete step:** none for this task. (Note: this removes the recipe
+from the *code*; the live site stops showing it after the next normal
+deploy through the human-reviewed PR/CI path.)
