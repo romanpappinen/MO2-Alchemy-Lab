@@ -189,15 +189,10 @@ export function usePotionStore () {
     try {
       const raw = localStorage.getItem('alchemy_potions_v1')
       if (raw) {
-        const stored = JSON.parse(raw)
-        // The app used to seed a built-in example recipe on first load
-        // (marked preset:true). It has been removed — drop unedited seeded
-        // copies from returning visitors too. Saving/editing rebuilds the
-        // record without the flag, so user-modified copies are kept.
-        potionList.value = stored.filter(r => !r.preset)
-        if (potionList.value.length !== stored.length) {
-          _persist()
-        }
+        // The app used to seed a built-in example recipe here on first
+        // load; that seeding is gone, but visitors who already have it
+        // keep their stored copy untouched.
+        potionList.value = JSON.parse(raw)
       }
     } catch {}
     if (recipe.lines.length === 0) {

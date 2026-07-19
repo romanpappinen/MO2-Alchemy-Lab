@@ -230,3 +230,14 @@ Also add `"test": "node --test tests/"` to package.json scripts when landing.
 **Next concrete step:** none for this task. (Note: this removes the recipe
 from the *code*; the live site stops showing it after the next normal
 deploy through the human-reviewed PR/CI path.)
+
+## 2026-07-19 — Follow-up: keep the already-seeded V1 for existing visitors
+
+User correction to the previous entry: do NOT purge the seeded recipe from
+returning visitors — only stop seeding it for new ones. `loadPotions()` now
+loads stored recipes as-is again (the `preset:true` purge is reverted);
+`presetPotions.js` stays deleted.
+
+Verified with Playwright: a visitor with V1 already in localStorage still
+sees it on the Recipes tab and storage is untouched; a fresh visitor gets an
+empty list and nothing seeded; no console errors.
