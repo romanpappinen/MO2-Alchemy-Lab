@@ -158,3 +158,47 @@ prepared but NOT written to the repo. Planned contents, for whoever resumes:
    ~180 374.9, Skadite 1-craft balance (Calx 558 035.71, Dragon Salt 4 190).
 
 Also add `"test": "node --test tests/"` to package.json scripts when landing.
+
+## 2026-07-19 — In-repo automated test suite (+ 2 bugs it caught)
+
+**What changed:**
+- Added `tests/craftConstants.test.mjs` — the last open PLAN.md item — on
+  Node 22's built-in test runner; `"test": "node --test"` added to
+  package.json (no new dependencies, per the no-network-installs rule).
+  Six groups, 39 tests: (1) data integrity — every step option's `input`
+  string parsed and matched 1:1 against `refineRecipes.js` (yield + every
+  byproduct field via a field→material map); (2) alloy sanity — each RO metal
+  has exactly one 10000+5000+5000→7000 Refining Oven recipe, Skadite has
+  none (Fabricula/3200); (3) calc invariants — defaults + one-step-at-a-time
+  + 150 seeded-random selections × tool × perk combos: finite, non-negative,
+  and exactly linear in target; (4) exactly one `totals:true` row per tree;
+  (5) perk semantics — ironmaster divides the three alloy-component rows by
+  1.03 and leaves Skadite's tree deep-equal-unchanged; extract bonus never
+  increases a base need on default selections (off-default, byproduct
+  cross-crediting legitimately lets individual ores grow — documented in the
+  test); (6) regression pins — Messing/Bron Saburra 126 262.63, Bron
+  Bleckblende fully covered (+11 666.67 bonus), Tindremic Saburra 180 375.18,
+  Skadite 1-craft balance (CG 10 000, Calx 558 035.71, DS 4 190, Water
+  55 803.57, runs=1).
+- **Bug 1 (caught by group 1):** `refineRecipes.js` spelled the same material
+  two ways — `Acronite` in the two Pyroxene refine outputs vs `Arconite` in
+  the Cronite alloy catalyst (the source dump itself is inconsistent, 10 vs 1).
+  Normalized to `Arconite` alongside the existing `Cinnibar`→`Cinnabar` note.
+- **Bug 2 (caught by group 5):** zero-amount rows flickered in/out of the
+  totals section (e.g. Steel showed "Coal 0" at target 10 000 but not 7 000)
+  because guards on exact-cover quantities (`netCoal>0`, `coalBonus>0`,
+  `cpBonus>0`, `sabPBonus>0`, `malSabBonus>0`) compared ±1e-12 float noise
+  against zero — the Crusher/Grinder mix and the Saburra 2x2 solver cover
+  those needs exactly. All 16 such guards now use `>1e-6`.
+
+**What was verified:**
+- `npm test`: 39/39 pass (~0.8 s).
+- Mutation spot-check in a scratch copy outside the repo: flipping Coke yield
+  7200→7300 fails 8 tests (every metal's data-integrity group) — the suite bites.
+- `node --check` on craftConstants.js; eslint clean on the new test file
+  (auto-fixed to house style).
+- Playwright vs `npm run dev` (fresh localStorage, EN): Steel/Cronite/Oghmium
+  render with no console errors and no zero-amount rows; Steel's totals no
+  longer show the spurious "Coal 0" line.
+
+**Next concrete step:** none — all PLAN.md items are done.

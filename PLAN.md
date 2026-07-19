@@ -27,10 +27,11 @@ Russian anywhere else.
 - [x] Translate existing Russian code comments in `craftConstants.js` to English (comment-only diff, verified code parts identical)
 - [x] Add **Skadite** as a craftable target — modeled per the design note below: Calx -> Calspar -> Chalk Glance (driven output, Malachite/Electrum flip into byproducts) -> Skadite via Fabricula; own `runs = target/3200` metric and a per-metal `furnace`/`craftYield` header (the "Refining Oven · 7000/craft" subtitle was hardcoded). Coke-catalyst option included with the full Coal->Coke chain + Crusher/Grinder Calx mix.
 - [x] Bugfix found along the way: the ore-price panel matched the tree's totals section by the *Russian* header text, so it was empty in the EN locale ever since the tree i18n landed. Totals rows now carry a structural `totals:true` flag that `useCraftCalc.js` keys off instead.
+- [x] Real automated test suite — `tests/craftConstants.test.mjs` on Node's built-in runner (`npm test` → `node --test`, no new dependencies). Six groups: data integrity of all ~190 step options vs `refineRecipes.js`, alloy sanity, calc invariants (finite/non-negative/linear across option×tool×perk sweeps), the `totals:true` marker, perk semantics, and hand-derived regression pins for the Saburra/Skadite chains. Writing it surfaced two real bugs, both fixed: `refineRecipes.js` spelled the same material two ways (`Acronite` in Pyroxene outputs vs `Arconite` in the Cronite alloy — normalized to `Arconite`, matching the source's alloy line), and zero-amount rows (e.g. "Coal 0") flickered in/out of the totals section because exact-cover guards (`netCoal>0` etc.) compared float noise against zero — now epsilon guards.
 
 ## In progress
 
-- [ ] Real automated test suite (current checks are one-off node scripts, not part of the repo)
+(nothing — all planned items done)
 
 ## Notes / decisions made along the way
 

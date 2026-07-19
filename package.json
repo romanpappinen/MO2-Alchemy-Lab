@@ -8,6 +8,7 @@
     "build": "vite build",
     "preview": "vite preview",
     "build-only": "vite build",
+    "test": "node --test",
     "type-check": "vue-tsc --build --force",
     "lint": "eslint",
     "lint:fix": "eslint --fix",

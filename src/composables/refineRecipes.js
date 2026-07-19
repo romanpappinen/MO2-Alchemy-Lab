@@ -4,8 +4,9 @@
 // convention. Each entry in base_refine.txt that listed the same
 // (input, catalysts, building) combo multiple times — once per producible
 // output — has been collapsed into a single recipe with a combined
-// `outputs` array. `Cinnibar` (a source typo) has been normalized to
-// `Cinnabar`.
+// `outputs` array. Source typos have been normalized: `Cinnibar` →
+// `Cinnabar`, and `Acronite` → `Arconite` (the source uses both spellings
+// for the same material; the Cronite alloy line spells it `Arconite`).
 
 export const RECIPES = [
   // ── kind: 'alloy' — base + 2 catalysts, always "Refining Oven" ──────────
@@ -134,7 +135,7 @@ export const RECIPES = [
     building: 'Blast Furnace',
     outputs: [
       { name: 'Almine', amount: 400 },
-      { name: 'Acronite', amount: 800 },
+      { name: 'Arconite', amount: 800 },
       { name: 'Calamine', amount: 2040 },
       { name: 'Electrum', amount: 2720 },
     ],
@@ -146,7 +147,7 @@ export const RECIPES = [
     building: 'Greater Natorus',
     outputs: [
       { name: 'Almine', amount: 2000 },
-      { name: 'Acronite', amount: 160 },
+      { name: 'Arconite', amount: 160 },
       { name: 'Calamine', amount: 3400 },
       { name: 'Electrum', amount: 2720 },
     ],
